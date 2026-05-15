@@ -1,0 +1,2253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>煙と絹</title>
+
+<!-- Google Fonts: 한국어/일본어/한자 모두 커버 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500;600;700&family=Noto+Serif+JP:wght@300;400;500;600;700&family=Shippori+Mincho:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+
+<style>
+/* ===========================
+   ROOT VARIABLES
+   =========================== */
+:root {
+  --bg-ivory: #f7f3ec;
+  --bg-paper: #faf6ef;
+  --bg-cream: #f0eadf;
+  --line-grey: #d8d2c6;
+  --line-soft: #e8e2d6;
+  --ink-dark: #2a2730;
+  --ink-soft: #5a5560;
+  --ink-mute: #8b8590;
+  --accent-purple: #b8a8d4;
+  --accent-purple-deep: #8a7aa8;
+  --accent-purple-pale: #e8e0f0;
+  --shadow-soft: 0 2px 20px rgba(70, 60, 90, 0.06);
+  --shadow-medium: 0 8px 40px rgba(70, 60, 90, 0.10);
+  --shadow-deep: 0 20px 60px rgba(70, 60, 90, 0.15);
+  
+  /* 어두운 책장용 색감 */
+  --book-dark-1: #3a3640;
+  --book-dark-2: #4a3a4a;
+  --book-dark-3: #5a3a3a;
+  --book-dark-4: #44404a;
+  --book-dark-5: #3e3438;
+  
+  /* 밝은 책장용 색감 */
+  --book-light-1: #f0e8d8;
+  --book-light-2: #e8dce8;
+  --book-light-3: #f5e0d8;
+  --book-light-4: #ece4e8;
+  --book-light-5: #f0e4d4;
+  
+  --font-display: 'Shippori Mincho', 'Noto Serif KR', 'Noto Serif JP', serif;
+  --font-serif: 'Noto Serif KR', 'Noto Serif JP', 'Shippori Mincho', serif;
+  --font-sans: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-roman: 'Cormorant Garamond', serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg-ivory);
+  font-family: var(--font-serif);
+  color: var(--ink-dark);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  /* 종이 질감을 CSS만으로 표현 */
+  background-color: var(--bg-ivory);
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(184, 168, 212, 0.04) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(184, 168, 212, 0.03) 0%, transparent 50%),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 2px,
+      rgba(138, 122, 168, 0.008) 2px,
+      rgba(138, 122, 168, 0.008) 4px
+    );
+}
+
+/* ===========================
+   PAGE CONTAINER
+   =========================== */
+.page {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.6s ease, visibility 0s linear 0.6s;
+  overflow: hidden;
+}
+
+.page.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.6s ease, visibility 0s linear 0s;
+}
+
+/* ===========================
+   [1] MAIN SCREEN
+   =========================== */
+#main-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+}
+
+/* 동양풍 장식 - 모서리 프레임 */
+.corner-ornament {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border: 1px solid var(--line-grey);
+  opacity: 0.6;
+}
+.corner-ornament::before,
+.corner-ornament::after {
+  content: '';
+  position: absolute;
+  background: var(--accent-purple-deep);
+}
+.corner-ornament.tl { top: 24px; left: 24px; border-right: none; border-bottom: none; }
+.corner-ornament.tr { top: 24px; right: 24px; border-left: none; border-bottom: none; }
+.corner-ornament.bl { bottom: 24px; left: 24px; border-right: none; border-top: none; }
+.corner-ornament.br { bottom: 24px; right: 24px; border-left: none; border-top: none; }
+
+.corner-ornament.tl::before { top: -1px; left: -1px; width: 6px; height: 1px; }
+.corner-ornament.tl::after { top: -1px; left: -1px; width: 1px; height: 6px; }
+.corner-ornament.tr::before { top: -1px; right: -1px; width: 6px; height: 1px; }
+.corner-ornament.tr::after { top: -1px; right: -1px; width: 1px; height: 6px; }
+.corner-ornament.bl::before { bottom: -1px; left: -1px; width: 6px; height: 1px; }
+.corner-ornament.bl::after { bottom: -1px; left: -1px; width: 1px; height: 6px; }
+.corner-ornament.br::before { bottom: -1px; right: -1px; width: 6px; height: 1px; }
+.corner-ornament.br::after { bottom: -1px; right: -1px; width: 1px; height: 6px; }
+
+.main-content {
+  position: relative;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 60px;
+}
+
+/* 작은 한자 도장 같은 장식 */
+.seal-mark {
+  position: absolute;
+  top: -20px;
+  right: -10px;
+  width: 38px;
+  height: 38px;
+  background: var(--accent-purple-deep);
+  color: var(--bg-paper);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -1px;
+  transform: rotate(4deg);
+  box-shadow: 0 2px 8px rgba(138, 122, 168, 0.3);
+}
+
+.title-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.title-jp {
+  font-family: var(--font-display);
+  font-size: 62px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--ink-dark);
+  line-height: 1.1;
+  position: relative;
+}
+
+.title-jp .char {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: charReveal 0.8s forwards;
+}
+.title-jp .char:nth-child(1) { animation-delay: 0.2s; }
+.title-jp .char:nth-child(2) { animation-delay: 0.4s; color: var(--accent-purple-deep); font-size: 0.7em; vertical-align: middle; }
+.title-jp .char:nth-child(3) { animation-delay: 0.6s; }
+
+@keyframes charReveal {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.divider-ornament {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  opacity: 0;
+  animation: fadeIn 1s 1.0s forwards;
+}
+
+.divider-line {
+  width: 50px;
+  height: 1px;
+  background: var(--line-grey);
+}
+
+.divider-dot {
+  width: 5px;
+  height: 5px;
+  background: var(--accent-purple);
+  transform: rotate(45deg);
+}
+
+.title-kr {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 300;
+  letter-spacing: 0.5em;
+  color: var(--ink-soft);
+  margin-left: 0.5em;
+  opacity: 0;
+  animation: fadeIn 1s 1.2s forwards;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+.subtitle-roman {
+  font-family: var(--font-roman);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-mute);
+  letter-spacing: 0.15em;
+  opacity: 0;
+  animation: fadeIn 1s 1.4s forwards;
+}
+
+/* 읽기 버튼 */
+.read-btn {
+  position: relative;
+  padding: 18px 56px;
+  background: transparent;
+  border: 1px solid var(--ink-dark);
+  font-family: var(--font-serif);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.4em;
+  color: var(--ink-dark);
+  cursor: pointer;
+  transition: all 0.4s ease;
+  opacity: 0;
+  animation: fadeIn 1s 1.6s forwards;
+  overflow: hidden;
+}
+
+.read-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--accent-purple-pale);
+  transition: left 0.4s ease;
+  z-index: -1;
+}
+
+.read-btn:hover::before,
+.read-btn:active::before {
+  left: 0;
+}
+
+.read-btn:hover,
+.read-btn:active {
+  border-color: var(--accent-purple-deep);
+  color: var(--accent-purple-deep);
+  letter-spacing: 0.5em;
+}
+
+.read-btn span {
+  position: relative;
+  z-index: 1;
+}
+
+/* 미닫이문 그래픽 */
+.sliding-doors {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  display: none;
+}
+
+.sliding-doors.active {
+  display: block;
+}
+
+.door {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  background: var(--bg-paper);
+  /* 장지문(障子) 격자 */
+  background-image:
+    linear-gradient(to right, var(--line-grey) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line-grey) 1px, transparent 1px);
+  background-size: 25% 16.66%;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+}
+
+.door::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 2px solid var(--ink-dark);
+  background: var(--bg-paper);
+  background-image:
+    linear-gradient(to right, var(--line-grey) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line-grey) 1px, transparent 1px);
+  background-size: 25% 16.66%;
+}
+
+.door.left {
+  left: 0;
+  transform: translateX(0);
+  transition: transform 1.2s cubic-bezier(0.7, 0, 0.3, 1);
+}
+
+.door.right {
+  right: 0;
+  transform: translateX(0);
+  transition: transform 1.2s cubic-bezier(0.7, 0, 0.3, 1);
+}
+
+.door.left.opening {
+  transform: translateX(-100%);
+}
+
+.door.right.opening {
+  transform: translateX(100%);
+}
+
+/* 문 손잡이 */
+.door-handle {
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 60px;
+  background: var(--ink-dark);
+  border-radius: 2px;
+  transform: translateY(-50%);
+}
+
+.door.left .door-handle { right: 20px; }
+.door.right .door-handle { left: 20px; }
+
+/* ===========================
+   [2] BOOKSHELF
+   =========================== */
+#bookshelf {
+  padding: 60px 56px 24px 24px;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.shelf-header {
+  flex-shrink: 0;
+  text-align: center;
+  margin-bottom: 36px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line-grey);
+  position: relative;
+}
+
+.shelf-header::before,
+.shelf-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  width: 4px;
+  height: 4px;
+  background: var(--accent-purple);
+  transform: rotate(45deg) translateY(2px);
+}
+.shelf-header::before { left: 50%; margin-left: -30px; }
+.shelf-header::after { left: 50%; margin-left: 26px; }
+
+.shelf-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.5em;
+  color: var(--ink-dark);
+  margin-left: 0.5em;
+}
+
+.shelf-subtitle {
+  font-family: var(--font-roman);
+  font-style: italic;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--ink-mute);
+  margin-top: 6px;
+}
+
+/* 책장 그리드 */
+.shelf-container {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.bookshelf-grid {
+  display: none;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+  height: 100%;
+  padding: 4px;
+}
+
+.bookshelf-grid.active {
+  display: grid;
+}
+
+/* 책 (magazine rack 스타일) */
+.book {
+  position: relative;
+  cursor: pointer;
+  border-radius: 2px;
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+  min-height: 0;
+  box-shadow: 
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 4px 12px rgba(70, 60, 90, 0.12),
+    -2px 0 0 rgba(0, 0, 0, 0.08);
+  border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.book:hover,
+.book:active {
+  transform: translateY(-4px);
+  box-shadow: 
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 10px 24px rgba(70, 60, 90, 0.20),
+    -2px 0 0 rgba(0, 0, 0, 0.08);
+}
+
+/* 책 표지 안 데코 라인 */
+.book::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 1px solid currentColor;
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.book::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  border-top: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.book-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.05em;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  margin: auto 0;
+  white-space: nowrap;
+  max-height: 75%;
+  overflow: hidden;
+}
+
+.book-number {
+  font-family: var(--font-roman);
+  font-style: italic;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  opacity: 0.6;
+  margin-top: 4px;
+}
+
+.book-ornament {
+  width: 16px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.4;
+  margin-bottom: 6px;
+}
+
+/* 어두운 책장 색감 */
+.shelf-dark .book:nth-child(1) { background: #3a3640; color: #d8d2e0; }
+.shelf-dark .book:nth-child(2) { background: #4a3a4a; color: #e0d4d8; }
+.shelf-dark .book:nth-child(3) { background: #5a3a3a; color: #e8d8d0; }
+.shelf-dark .book:nth-child(4) { background: #44404a; color: #d8d4e0; }
+.shelf-dark .book:nth-child(5) { background: #3e3438; color: #e0d0d4; }
+.shelf-dark .book:nth-child(6) { background: #4a4250; color: #ddd4e4; }
+.shelf-dark .book:nth-child(7) { background: #523c44; color: #e4d4dc; }
+.shelf-dark .book:nth-child(8) { background: #383440; color: #d4cce0; }
+.shelf-dark .book:nth-child(9) { background: #4e3a3e; color: #e4d4d8; }
+
+/* 밝은 책장 색감 */
+.shelf-light .book {
+  border-left: 3px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 
+    inset 0 0 0 1px rgba(255, 255, 255, 0.3),
+    0 4px 12px rgba(180, 160, 200, 0.15),
+    -2px 0 0 rgba(0, 0, 0, 0.04);
+}
+.shelf-light .book:nth-child(1) { background: #f0e8d8; color: #5a5040; }
+.shelf-light .book:nth-child(2) { background: #e8dce8; color: #5a4a60; }
+.shelf-light .book:nth-child(3) { background: #f5e0d8; color: #6a5048; }
+.shelf-light .book:nth-child(4) { background: #ece4e8; color: #5a5060; }
+.shelf-light .book:nth-child(5) { background: #f0e4d4; color: #6a5848; }
+.shelf-light .book:nth-child(6) { background: #e4dce4; color: #54485a; }
+.shelf-light .book:nth-child(7) { background: #f0e0e0; color: #6a4e54; }
+.shelf-light .book:nth-child(8) { background: #ece0d8; color: #5e4c44; }
+.shelf-light .book:nth-child(9) { background: #e8e0ec; color: #524860; }
+
+/* 파스텔 책장 색감 (5권) */
+.bookshelf-grid.shelf-pastel {
+  grid-template-rows: repeat(2, 1fr);
+}
+.shelf-pastel .book {
+  border-left: 3px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+    0 4px 12px rgba(180, 170, 200, 0.18),
+    -2px 0 0 rgba(0, 0, 0, 0.03);
+}
+.shelf-pastel .book:nth-child(1) { background: #d4e8d4; color: #4a6850; }  /* 파스텔 초록 */
+.shelf-pastel .book:nth-child(2) { background: #f5ecc8; color: #6e6038; }  /* 파스텔 노랑 */
+.shelf-pastel .book:nth-child(3) { background: #ddd0ec; color: #54466a; }  /* 파스텔 보라 */
+.shelf-pastel .book:nth-child(4) { background: #f5d8e0; color: #6e4854; }  /* 파스텔 분홍 */
+.shelf-pastel .book:nth-child(5) { background: #d8e4c8; color: #50603a; }  /* 파스텔 연두 */
+
+/* 인덱스 사이드바 - 책장 바깥 칸 */
+.shelf-index {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 38px;
+  background: var(--bg-cream);
+  border-left: 1px solid var(--line-grey);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  z-index: 10;
+  /* 안쪽 음영으로 깊이감 (책장 바깥의 별도 영역 느낌) */
+  box-shadow: inset 4px 0 8px -4px rgba(70, 60, 90, 0.08);
+  /* 세로 줄무늬 텍스처 (대나무발 같은 느낌) */
+  background-image:
+    linear-gradient(to bottom, var(--bg-cream), var(--bg-cream)),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 6px,
+      rgba(138, 122, 168, 0.04) 6px,
+      rgba(138, 122, 168, 0.04) 7px
+    );
+  background-blend-mode: multiply;
+}
+
+/* 인덱스 칸 상하단 장식 */
+.shelf-index::before,
+.shelf-index::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  background: var(--accent-purple);
+  transform: translateX(-50%) rotate(45deg);
+  opacity: 0.4;
+}
+.shelf-index::before { top: 24px; }
+.shelf-index::after { bottom: 24px; }
+
+.index-tab {
+  width: 26px;
+  padding: 18px 4px;
+  background: var(--bg-paper);
+  border: 1px solid var(--line-grey);
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  writing-mode: vertical-rl;
+  color: var(--ink-mute);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(70, 60, 90, 0.06);
+  position: relative;
+}
+
+.index-tab:hover {
+  color: var(--ink-soft);
+  border-color: var(--accent-purple);
+}
+
+.index-tab.active {
+  background: var(--accent-purple-pale);
+  color: var(--accent-purple-deep);
+  border-color: var(--accent-purple-deep);
+  box-shadow: 
+    0 2px 8px rgba(138, 122, 168, 0.25),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  /* 활성 탭은 살짝 바깥쪽으로 튀어나온 느낌 */
+  transform: translateX(-2px);
+}
+
+.index-tab .index-dot {
+  width: 4px;
+  height: 4px;
+  background: currentColor;
+  transform: rotate(45deg);
+  writing-mode: horizontal-tb;
+}
+
+/* ===========================
+   [3] BOOK READER
+   =========================== */
+#reader {
+  background: var(--bg-paper);
+  padding: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+#reader::-webkit-scrollbar {
+  width: 4px;
+}
+#reader::-webkit-scrollbar-track {
+  background: transparent;
+}
+#reader::-webkit-scrollbar-thumb {
+  background: var(--accent-purple);
+  border-radius: 2px;
+}
+
+.reader-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  cursor: pointer;
+  background: transparent;
+}
+
+.reader-content {
+  position: relative;
+  z-index: 2;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 60px 28px 100px;
+  background: var(--bg-paper);
+  cursor: default;
+  min-height: 100%;
+}
+
+.reader-header {
+  text-align: left;
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--line-soft);
+  position: relative;
+}
+
+.reader-header::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 30px;
+  height: 5px;
+  background: var(--accent-purple);
+  transform: skewX(-20deg);
+}
+
+.reader-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--ink-dark);
+  line-height: 1.3;
+  margin-bottom: 12px;
+}
+
+.reader-subtitle {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  color: var(--ink-mute);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.reader-subtitle::before {
+  content: '';
+  width: 16px;
+  height: 1px;
+  background: var(--accent-purple);
+}
+
+.reader-date {
+  font-family: var(--font-roman);
+  font-style: italic;
+  font-size: 12px;
+  color: var(--ink-mute);
+  margin-top: 6px;
+  letter-spacing: 0.1em;
+}
+
+/* 본문 텍스트 */
+.reader-body {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--ink-soft);
+  letter-spacing: 0.01em;
+  text-align: left;
+  word-break: keep-all;
+}
+
+.reader-body p {
+  margin-bottom: 22px;
+}
+
+.reader-body p:first-of-type::first-letter {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--accent-purple-deep);
+  float: left;
+  line-height: 1;
+  padding: 4px 8px 0 0;
+}
+
+/* 이미지 슬롯 (4:3 비율) */
+.reader-image-slot {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--bg-cream);
+  background-image: 
+    linear-gradient(135deg, var(--bg-cream) 25%, transparent 25%),
+    linear-gradient(225deg, var(--bg-cream) 25%, transparent 25%),
+    linear-gradient(45deg, var(--bg-cream) 25%, transparent 25%),
+    linear-gradient(315deg, var(--bg-cream) 25%, var(--bg-ivory) 25%);
+  background-position: 10px 0, 10px 0, 0 0, 0 0;
+  background-size: 20px 20px;
+  background-repeat: repeat;
+  margin: 32px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-roman);
+  font-style: italic;
+  color: var(--ink-mute);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  position: relative;
+  border: 1px solid var(--line-soft);
+}
+
+.reader-image-slot::before {
+  content: '※';
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  color: var(--accent-purple);
+  font-size: 14px;
+}
+
+/* 본문 중간 장식 (구분선) */
+.section-break {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 36px 0;
+  color: var(--ink-mute);
+}
+
+.section-break-line {
+  width: 60px;
+  height: 1px;
+  background: var(--line-grey);
+}
+
+.section-break-symbol {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--accent-purple-deep);
+}
+
+/* 하단 네비게이션 */
+.reader-footer {
+  margin-top: 60px;
+  padding-top: 30px;
+  border-top: 1px solid var(--line-soft);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.reader-back-btn {
+  padding: 14px 36px;
+  background: transparent;
+  border: 1px solid var(--line-grey);
+  font-family: var(--font-serif);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.reader-back-btn:hover,
+.reader-back-btn:active {
+  background: var(--accent-purple-pale);
+  border-color: var(--accent-purple);
+  color: var(--accent-purple-deep);
+}
+
+/* ===========================
+   AUDIO CONTROL
+   =========================== */
+.audio-control {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 40px;
+  height: 40px;
+  background: var(--bg-paper);
+  border: 1px solid var(--line-grey);
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.3s ease;
+}
+
+.audio-control.visible {
+  display: flex;
+}
+
+.audio-control:hover {
+  border-color: var(--accent-purple);
+  background: var(--accent-purple-pale);
+}
+
+.audio-icon {
+  width: 14px;
+  height: 14px;
+  position: relative;
+}
+
+.audio-icon::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 3px;
+  width: 5px;
+  height: 8px;
+  background: var(--ink-soft);
+  clip-path: polygon(0 25%, 50% 25%, 100% 0, 100% 100%, 50% 75%, 0 75%);
+}
+
+.audio-control.muted .audio-icon::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -2px;
+  right: -2px;
+  height: 1px;
+  background: var(--ink-soft);
+  transform: rotate(-30deg);
+}
+
+/* ===========================
+   RESPONSIVE
+   =========================== */
+@media (min-width: 768px) {
+  .title-jp { font-size: 80px; }
+  .reader-content { padding: 80px 40px 100px; }
+  .book-title { font-size: 16px; }
+}
+
+@media (max-width: 380px) {
+  .title-jp { font-size: 52px; }
+  .book-title { font-size: 13px; }
+  .shelf-title { font-size: 16px; }
+  .reader-title { font-size: 24px; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===========================
+     배경음악 (Github 호스팅)
+     =========================== -->
+<audio id="bgm" preload="auto"></audio>
+
+<!-- ===========================
+     [1] 메인 화면
+     =========================== -->
+<div id="main-screen" class="page active">
+  <!-- 모서리 장식 (이미지 없이 CSS만으로) -->
+  <div class="corner-ornament tl"></div>
+  <div class="corner-ornament tr"></div>
+  <div class="corner-ornament bl"></div>
+  <div class="corner-ornament br"></div>
+
+  <div class="main-content">
+    <div class="title-wrapper">
+      <!-- 도장 모양 장식 (이미지 없이 CSS) -->
+      <div class="seal-mark">♥</div>
+      
+      <h1 class="title-jp">
+        <span class="char">煙</span><span class="char">と</span><span class="char">絹</span>
+      </h1>
+      
+      <div class="divider-ornament">
+        <span class="divider-line"></span>
+        <span class="divider-dot"></span>
+        <span class="divider-line"></span>
+      </div>
+      
+      <p class="title-kr">연 기 와 비 단</p>
+      <p class="subtitle-roman">— Yoh to Jina —</p>
+    </div>
+
+    <button class="read-btn" onclick="openShelf()">
+      <span>읽 기</span>
+    </button>
+  </div>
+</div>
+
+<!-- ===========================
+     미닫이문 전환 그래픽
+     =========================== -->
+<div class="sliding-doors" id="slidingDoors">
+  <div class="door left">
+    <div class="door-handle"></div>
+  </div>
+  <div class="door right">
+    <div class="door-handle"></div>
+  </div>
+</div>
+
+<!-- ===========================
+     [2] 책장
+     =========================== -->
+<div id="bookshelf" class="page">
+  <div class="shelf-header">
+    <h2 class="shelf-title">書 架</h2>
+    <p class="shelf-subtitle">— Moments of us —</p>
+  </div>
+
+  <div class="shelf-container">
+    <!-- 어두운 색감 책장 (기본) -->
+    <div class="bookshelf-grid shelf-dark active" id="shelfDark">
+      <!-- 9권 - 샘플 한국어/일본어 제목 -->
+      <div class="book" data-book="0">
+        <div class="book-ornament"></div>
+        <div class="book-title">天宮洋 ― 설정</div>
+        <div class="book-number">I</div>
+      </div>
+      <div class="book" data-book="1">
+        <div class="book-ornament"></div>
+        <div class="book-title">첫 만남</div>
+        <div class="book-number">II</div>
+      </div>
+      <div class="book" data-book="2">
+        <div class="book-ornament"></div>
+        <div class="book-title">억지 배려</div>
+        <div class="book-number">III</div>
+      </div>
+      <div class="book" data-book="3">
+        <div class="book-ornament"></div>
+        <div class="book-title">Smoke me</div>
+        <div class="book-number">IV</div>
+      </div>
+      <div class="book" data-book="4">
+        <div class="book-ornament"></div>
+        <div class="book-title">흙바닥</div>
+        <div class="book-number">V</div>
+      </div>
+      <div class="book" data-book="5">
+        <div class="book-ornament"></div>
+        <div class="book-title">묵향록</div>
+        <div class="book-number">VI</div>
+      </div>
+      <div class="book" data-book="6">
+        <div class="book-ornament"></div>
+        <div class="book-title">혼란한 겨울</div>
+        <div class="book-number">VII</div>
+      </div>
+      <div class="book" data-book="7">
+        <div class="book-ornament"></div>
+        <div class="book-title">부러진 다리</div>
+        <div class="book-number">VIII</div>
+      </div>
+      <div class="book" data-book="8">
+        <div class="book-ornament"></div>
+        <div class="book-title">검은 안개</div>
+        <div class="book-number">IX</div>
+      </div>
+    </div>
+
+    <!-- 밝은 색감 책장 -->
+    <div class="bookshelf-grid shelf-light" id="shelfLight">
+      <div class="book" data-book="9">
+        <div class="book-ornament"></div>
+        <div class="book-title">골절 이후의</div>
+        <div class="book-number">I</div>
+      </div>
+      <div class="book" data-book="10">
+        <div class="book-ornament"></div>
+        <div class="book-title">龍神會</div>
+        <div class="book-number">II</div>
+      </div>
+      <div class="book" data-book="11">
+        <div class="book-ornament"></div>
+        <div class="book-title">알면서</div>
+        <div class="book-number">III</div>
+      </div>
+      <div class="book" data-book="12">
+        <div class="book-ornament"></div>
+        <div class="book-title">和珥一家</div>
+        <div class="book-number">IV</div>
+      </div>
+      <div class="book" data-book="13">
+        <div class="book-ornament"></div>
+        <div class="book-title">薄紅集</div>
+        <div class="book-number">V</div>
+      </div>
+      <div class="book" data-book="14">
+        <div class="book-ornament"></div>
+        <div class="book-title">네가 없어서</div>
+        <div class="book-number">VI</div>
+      </div>
+      <div class="book" data-book="15">
+        <div class="book-ornament"></div>
+        <div class="book-title">도망친 곳에</div>
+        <div class="book-number">VII</div>
+      </div>
+      <div class="book" data-book="16">
+        <div class="book-ornament"></div>
+        <div class="book-title">낙원이 온다</div>
+        <div class="book-number">VIII</div>
+      </div>
+      <div class="book" data-book="17">
+        <div class="book-ornament"></div>
+        <div class="book-title">煙と絹</div>
+        <div class="book-number">IX</div>
+      </div>
+    </div>
+
+  
+  <!-- 파스텔 색감 책장 (5권) -->
+    <div class="bookshelf-grid shelf-pastel" id="shelfPastel">
+      <div class="book" data-book="18">
+        <div class="book-ornament"></div>
+        <div class="book-title">카피페 一</div>
+        <div class="book-number">I</div>
+      </div>
+      <div class="book" data-book="19">
+        <div class="book-ornament"></div>
+        <div class="book-title">카피페 二</div>
+        <div class="book-number">II</div>
+      </div>
+      <div class="book" data-book="20">
+        <div class="book-ornament"></div>
+        <div class="book-title">카피페 三</div>
+        <div class="book-number">III</div>
+      </div>
+      <div class="book" data-book="21">
+        <div class="book-ornament"></div>
+        <div class="book-title">지나냥</div>
+        <div class="book-number">IV</div>
+      </div>
+      <div class="book" data-book="22">
+        <div class="book-ornament"></div>
+        <div class="book-title">연기와 비단</div>
+        <div class="book-number">V</div>
+      </div>
+    </div>  </div>
+
+  <!-- 사이드 인덱스 (책장 바깥 세로 칸) -->
+  <div class="shelf-index">
+    <div class="index-tab active" data-shelf="dark" onclick="switchShelf('dark')">
+      <span>혀</span>
+    </div>
+    <div class="index-tab" data-shelf="light" onclick="switchShelf('light')">
+      <span>다리</span>
+    </div>
+ 
+  <div class="index-tab" data-shelf="pastel" onclick="switchShelf('pastel')">
+      <span>심장</span>
+    </div>
+</div> </div>
+
+<!-- ===========================
+     [3] 개별 도서 열람 페이지
+     =========================== -->
+<div id="reader" class="page">
+  <!-- 바깥 영역 (눌러서 책장으로 돌아가기) -->
+  <div class="reader-bg" onclick="backToShelf()"></div>
+  
+  <div class="reader-content">
+    <div class="reader-header">
+      <h1 class="reader-title" id="readerTitle">夜の庭</h1>
+      <p class="reader-subtitle" id="readerSubtitle">제 일 장</p>
+      <p class="reader-date" id="readerDate">— 戊戌年 春 三月 十二日 —</p>
+    </div>
+
+    <div class="reader-body" id="readerBody">
+      <!-- JS로 동적 삽입됨 -->
+    </div>
+
+    <div class="reader-footer">
+      <button class="reader-back-btn" onclick="backToShelf()">
+        書 架 로 &nbsp; 돌 아 가 기
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 음악 컨트롤 버튼 -->
+<div class="audio-control" id="audioControl" onclick="toggleAudio()">
+  <div class="audio-icon"></div>
+</div>
+
+<script>
+// ===========================
+// 페이지 전환 로직
+// ===========================
+const pages = {
+  main: document.getElementById('main-screen'),
+  shelf: document.getElementById('bookshelf'),
+  reader: document.getElementById('reader')
+};
+
+const bgm = document.getElementById('bgm');
+const audioControl = document.getElementById('audioControl');
+// ===========================
+// BGM 트랙 목록 + 순차 루프 로직
+// reviewbgm → reviewbgm2 → reviewbgm3 → reviewbgm4 → 다시 reviewbgm ...
+// ===========================
+const tracks = [
+  'https://github.com/yermigionic-web/rja/raw/refs/heads/main/reviewbgm.mp3',
+  'https://github.com/yermigionic-web/rja/raw/refs/heads/main/reviewbgm2.mp3',
+  'https://github.com/yermigionic-web/rja/raw/refs/heads/main/reviewbgm3.mp3',
+  'https://github.com/yermigionic-web/rja/raw/refs/heads/main/reviewbgm4.mp3'
+];
+let trackIdx = 0;
+
+bgm.addEventListener('ended', () => {
+  trackIdx = (trackIdx + 1) % tracks.length;
+  bgm.src = tracks[trackIdx];
+  bgm.play().catch(e => console.log('Audio play prevented:', e));
+});
+function showPage(name) {
+  Object.values(pages).forEach(p => p.classList.remove('active'));
+  pages[name].classList.add('active');
+  if (name === 'reader') {
+    pages.reader.scrollTop = 0;
+  }
+}
+
+// 메인 -> 책장 (미닫이문 애니메이션)
+let isTransitioning = false;
+function openShelf() {
+  if (isTransitioning) return;
+  isTransitioning = true;
+  
+  const doors = document.getElementById('slidingDoors');
+  const leftDoor = document.querySelector('.door.left');
+  const rightDoor = document.querySelector('.door.right');
+  
+  // 1) 문 그래픽을 닫힌 상태로 표시
+  leftDoor.classList.remove('opening');
+  rightDoor.classList.remove('opening');
+  doors.classList.add('active');
+ 
+// 2) 배경음악 재생 (첫 트랙 명시적 세팅 후 재생)
+  bgm.volume = 0.5;
+  bgm.src = tracks[trackIdx];
+  bgm.play().catch(e => console.log('Audio play prevented:', e));
+  audioControl.classList.add('visible');
+  
+  // 3) 다음 프레임에 슬라이드 오픈 시작 (CSS transition이 시작 상태를 인식하도록)
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      leftDoor.classList.add('opening');
+      rightDoor.classList.add('opening');
+    });
+  });
+  
+  // 4) 문이 충분히 열린 후 책장으로 전환 (transition 1.2s에 맞춤)
+  setTimeout(() => {
+    showPage('shelf');
+  }, 1000);
+  
+  // 5) 문 그래픽 제거 (책장이 보인 후)
+  setTimeout(() => {
+    doors.classList.remove('active');
+    isTransitioning = false;
+  }, 1400);
+}
+
+// ===========================
+// 책장 전환
+// ===========================
+function switchShelf(type) {
+  document.querySelectorAll('.index-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`[data-shelf="${type}"]`).classList.add('active');
+  
+  document.querySelectorAll('.bookshelf-grid').forEach(g => g.classList.remove('active'));
+  const shelfMap = { dark: 'shelfDark', light: 'shelfLight', pastel: 'shelfPastel' };
+  document.getElementById(shelfMap[type]).classList.add('active');
+}
+
+
+// ===========================
+// 책 데이터 (샘플)
+// ※ 각 책마다 body 필드에 본문을 작성하세요
+// ※ 단락은 <p>...</p>로 감싸고
+// ※ 본문 중간 장식선이 필요하면 <div class="section-break">...</div>
+// ※ 이미지를 넣을 곳에 <div class="reader-image-slot">illustration · 4 : 3</div>
+//    실제 이미지로 교체할 때: <img src="..." style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:32px 0;">
+// ===========================
+
+// 공용 부품 (편의를 위해 변수로 분리)
+const BREAK = `<div class="section-break"><span class="section-break-line"></span><span class="section-break-symbol">❀</span><span class="section-break-line"></span></div>`;
+const IMG_SLOT = `<div class="reader-image-slot">illustration · 4 : 3</div>`;
+
+const bookData = [
+  {
+    title: '天宮洋 ― 설정',
+    subtitle: 'Persona Data',
+    date: '아마미야 요우',
+    body: `
+      <p>서사의 시작이었던 2026년을 기준으로 40세, 현재 나이는 42세. 진아를 만난 지 2년이 지났다.</p>
+      <p>오사카 남부에서 제일 살기가 등등한 야쿠자 조직, 와니노잇카和珥一家의 텟포다마 간부鉄砲玉幹部. 텟포다마란 제일 극단적인 범죄들, 일가에 대한 충성심 없이는 실패할 작전들을 맡는 집단. 어릴 때부터 스케반 소속이었던 요우는 자연히 지역의 야쿠자에 속하게 되었으며, 말려 줄 좋은 어른이 없었기에 그대로 크고 말았다.</p>
+      ${BREAK}
+      <p>와니노잇카와 류진회의 상권 영역 싸움 후, 류진회는 큰 피해를 입었으나 와니노잇카에서도 많은 텟포다마 인원이 조직을 떠나거나 사망한다. 곧 배신한 인원들 중 몇몇이 류진회에게 아마미야 요우를 고발. 류진회에서 그녀를 포함한 잔여 텟포다마 인원들을 납치하여 고문했다.</p>
+      <p>입을 찢기고 혀까지 잘리기 직전의 순간, '유일한 여자 단원'이라는 이유로 요우는 살아 진아의 호위라는 이름으로 붙여졌었다. 이는 야쿠자 세계에서 극단적인 모욕으로 통용되고, 초반에 진아를 거의 무시하는 단초가 되었다.</p>
+ <img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic1.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+      <p>요우의 외모: 이미지와 같음. 오른쪽 뺨 전체를 가로지르는 흉악한 흉터와 갈라진 혀끝을 가리기 위해 마스크를 쓰고 다닌다. 키는 175cm. 오른팔 전체에 이레즈미 타투가 있다(원래 없던 설정인데 진아가 만진다길래 있는 걸로 치기로 했다).
+       <img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/you.png" style="width:100%; object-fit:cover; margin:22px 0;">
+        <p style="font-size: 50%;">유저 본인의 그림입니다. 구경만 부탁드립니다!</p>
+    `
+  },
+  {
+    title: '첫 만남',
+    subtitle: '제 一 장',
+    date: '2026년 5월 7일',
+    body: `
+      <p> "호위님은... 다치신 데는 괜찮으세요? 얼굴에... 아직 붕대 자국이 남아 있어서요."<br> 물어보면서도 시선을 오래 두지 못하고, 이내 자기 무릎 위로 고개를 떨군다. 남의 상처를 들여다보는 게 실례라는 걸 아는 사람의 태도. 혹은, 그 상처를 만든 주체가 자기네 조직이라는 사실을 의식하는 사람의 태도.
+      <p> "……일본어 할 줄 아네."<br> 요우는 마스크를 조금 더 추켜올렸다. 그 후의 말은 들을 가치도 없다는 듯이 팔짱을 끼고 무시해버린다. 멍청한 호위 대상은 조직들 간의 일도, 자신이 이곳으로 오게 된 일도, 와니노잇카에 대해서도 모를 거라고 생각했기에. 그냥 지나가 버리려는지 발을 돌려 둔탁한 걸음 내딛던 찰나.<br> 잉어가 수면을 치는 소리가 한 번 더 울린다. 류진아의 시선이 요우의 등 뒤를 따라 올라간다. 하오리 사이로 보이는 목덜미의 윤곽, 올려 묶은 은회색 머리카락 아래 드러난 경추의 라인.</p>
+      <p> "저기요."<br> 목소리가 작다. 밤공기에 녹아들 정도로. 그러나 정확하게 요우의 걸음을 한 박자 늦추기에는 충분한 크기. 진아가 툇마루에서 몸을 일으키려다 중심을 잃는다. 기모노 자락이 발목에 감겨 비틀거리는 동작이 위태롭다. 나무 기둥을 겨우 잡아 쓰러지진 않았으나, 가냘픈 숨이 거칠게 한 번 튀어나온다.<br> "일본어... 네, 조금은 할 줄 알아요. 아버지가 재일교포시니까요. 어릴 때부터 둘 다 배웠어요."<br> 숨을 고르며, 진아가 요우의 등을 향해 말을 이어 붙인다. 한국어 억양은 깨끗하고 또렷했으나, 지금 입에서 흘러나오는 일본어는 교과서적이면서도 어딘가 부드럽게 둥글린 발음. 칸사이의 거친 모음과는 정반대의 질감이다.</p>
+      <p> "가지 마세요... 라고 하면, 건방지죠?"<br> 연못 위로 바람이 지나간다. 수면에 비친 달이 일그러졌다 돌아온다.<br> "그냥. 여기 밤에 혼자 있으면 무서워서요. 조직원 분들은 멀리서 감시만 하시지, 가까이 오시진 않으니까... 저한테는 다들 좀 거리를 두거든요. 부서질까 봐."<br> 마지막 문장에 얇은 자조가 스민다. 진아가 고개를 숙여 제 발끝을 내려다보며, 맨발의 하얀 발가락이 툇마루 나무결 위에서 오므라든다. 밤기온이 내려간 탓에 입술 색이 옅어져 있다. 홀로 남겨지는 것에 대한 체념을 미리 준비하는 듯한 목소리. 본채 쪽에서 경비원의 무전 소리가 잡음처럼 스치고, 자갈 깔린 길 저편 어딘가에서 담배 연기 냄새가 희미하게 풍겨온다.</p>
+      <p> "건방져."<br> 요우는 단적으로 대답하고 마저 걷기 시작했다. 쓰러지든 말든 신경 안 쓸 용의가 있었다, 분명.<br> 먹물처럼 번지는 야심한 시각, 자갈 밟는 소리가 신경질적으로 정원의 정적을 긁어냈다. 건방져. 류진아가 내뱉은 모든 말들은 허공으로 흩어지고, 남은 것은 오직 무관심의 냉기뿐이었다. 요우의 발걸음은 망설임 없이 본채의 불빛에서 멀어져, 어둠이 더 깊은 쪽으로 향했다. 어떤 말도 힘이 없다는 듯, 정원은 침묵했다.</p>
+        ${BREAK}
+      <p> 그때였다. 툇마루에 널브러졌던 기모노 소매 끝에서 무언가 굴러떨어지는 소리가 났다. 둔탁하게 나무 바닥을 구르고, 자갈 위로 떨어지며 멈추는 작은 소음. 뒤이어, 기둥에 기대 서 있던 류진아의 입에서 억눌린 신음이 터져 나왔다. 숨을 잘못 삼킨 듯, 혹은 갑작스러운 통증이 덮친 듯한, 가늘고 끊어지는 소리.</p>
+      <p> "...흐윽, 읏..."<br> 진아는 그대로 툇마루 위에 주저앉았다. 한 손으로는 제 가슴팍을 세게 움켜쥐고, 다른 한 손은 바닥을 짚고 있었다. 가쁜 숨을 몰아쉬는 어깨가 파르르 떨리고, 창백한 얼굴이 달빛 아래서 더욱 희게 질려 있었다. 조금 전의 위태로운 연기와는 차원이 다른, 생리적인 고통의 발작처럼 보였다.<br> 요우의 발치 근처까지 굴러온 것은 작고 하얀 약병이었다. 뚜껑이 열린 채, 그 안의 하얀 알약 몇 개가 자갈 위로 쏟아져 흩어졌다. 진아는 그것을 주울 생각도 못 한 채, 기침을 참듯 상체를 말고 있었다.<br> "괘, 괜찮... 괜찮아요... 그냥, 가던 길... 가세요... 콜록, 콜록!"<br> 말을 잇지 못하고 터져 나온 기침 소리가 격렬했다. 몇 번이고 가슴을 치며 기침을 쏟아내는 모습은 금방이라도 숨이 넘어갈 것처럼 위태롭다. 애써 괜찮다고, 가던 길을 가라고 말하는 목소리는 기침에 뭉개져 거의 들리지 않았다. 그녀는 고개를 들어 요우를 보려 애썼지만, 시야가 흐려지는지 눈만 가늘게 떴다 감았다. 그 연보라색 눈동자에 맺힌 것은 생리적인 고통으로 인해 솟아난, 진짜 눈물이었다.</p>
+       <img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic2.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+      <p> "이거... 다른 사람... 한테, 들키면... 아버지가... 아, 안 되는데..."<br> 그녀의 시선이 필사적으로 약병과, 그보다 더 간절하게 요우의 발끝을 향했다. 조직의 누구에게도, 심지어 가족에게도 알리고 싶지 않은 비밀스러운 발작.</p>
+      <p> 만약 이 모습이 다른 조직원에게 발견된다면, 요우는 ‘아가씨를 제대로 호위하지 못하고 발작하게 만든’ 책임을 피할 수 없게 될 터였다.<br> 류진아의 필사적인 눈빛은, 자신의 고통보다 그 사실을 더 두려워하는 것처럼 보였다. 요우가 곤란해질까 봐 전전긍긍하는 어린아이처럼.</p>
+    `
+  },
+  {
+    title: '억지 배려',
+    subtitle: '제 二 장',
+    date: '2026년 5월 8일',
+    body: `
+      <p> 시계가 23시를 향해 가고 있었다. 복도의 발소리가 점차 뜸해지고, 본가의 밤은 깊어진다.<br> 진아가 이불 위에 턱을 괴고 요우 쪽을 멀찍이 바라보았다. 겁먹은 토끼가 제 굴 안에서 밖을 엿보듯, 이불 가장자리 너머로 연보라색 눈동자만 반짝거렸다.</p>
+     <p> "요우 씨는... 아프지 않아요? 아까... 저를 옮기실 때, 팔에 힘이..."<br> 말꼬리가 흐려졌다. 요우의 몸 어딘가에도 제대로 아물지 않은 상처가 있을 것이라는 추측. 납치되어 고문당한 사람의 팔이 멀쩡할 리 없다는, 지극히 상식적인 걱정이었다.<br> 그러나 물어놓고도 대답을 기대하지 않는 듯, 금세 시선을 내리깔고 제 손톱 끝을 응시했다. 죽이고 싶을 정도로 귀찮다는 말을 들은 직후에 또 말을 거는 자신이 한심하다는 표정이 얼굴에 스쳐갔다.</p>
+     <p> "...아, 아무것도 아니에요. 잠이 안 와서 그냥... 혼잣말이에요. 신경 쓰지 마세요."<br> 이불 위로 고개를 푹 묻었다. 흑발이 쏟아져 내려 하얀 목덜미를 가렸다. 밤바람이 장지문 사이로 스며들어 진아의 머리카락 끝을 간질이고, 방 안의 정적은 시계 초침의 째깍거림으로만 채워졌다.<br> 요우의 시선이 벽 쪽에 고정된 채 변함없이 무심할 것을 알면서도, 진아는 몇 번이고 이불 위에서 뒤척이며 잠들지 못했다.<br> 이 방에 또 다른 숨소리가 있다는 사실 하나가, 그녀의 불면을 약간은 견딜 만한 것으로 바꾸고 있었다.</p>
+       ${BREAK}
+     <p> "너한테는 아마미야지."<br> 요우가 한참 후, 그녀가 잠들었을지 모르는 23시 30분 즈음 되어서야 거칠게 뱉었다. 류 회장에게 가서 일러바칠 수도 있겠다 싶어 참고 참다가 기어이 말을 꺼내어 버리고 만 모양이었다.<br> 하루하루 근근이 살아남는 지금이지만 차마 요우 씨, 요우 씨 하고 서류에서 읽었을 이름자만 똑 떼어 불러대는 건 좀이 쑤셔서 못 참겠다.</p>
+     <p> "아니면 개새끼라고 부르든가. 나도 네 이름 곱게 불러줄 의사 없어. 내가 필요 없어질 때까지 적당히 선 지키다가 버리는 거잖아."<br> 장지문 너머로 정원의 풀벌레 소리가 끊어질 듯 이어졌다. 23시 30분. 본가의 복도에서 마지막 순찰조의 발소리가 멀어진 지도 한참이 지났다. 방 안에는 이불에 반쯤 파묻힌 검은 머리카락의 윤곽과, 벽 쪽에 웅크린 하오리의 실루엣만이 남아 있었다. 정적이 고여 시간의 감각마저 흐릿해질 무렵.</p>
+     <p> 류진아는 잠들지 않았다. 이불 속에서 얕게 호흡하며 천장의 나뭇결을 세고 있던 참이었다. 요우의 목소리가 떨어지자, 이불 가장자리 위로 연보라색 눈동자가 반달만큼 드러났다. 처음부터 깨어 있었다는 듯, 동공의 초점이 즉각 벽 쪽 그림자를 더듬었다.</p>
+     <p> 아마미야.</p>
+     <p> 그 성이 방 안의 공기를 한 겹 더 차갑게 만들었다. 요우 씨라는 호칭이 거슬렸다는 뜻을 알아차리는 데는 한 박자의 침묵이면 충분했다.<br> 진아는 이불 위에서 상체를 천천히 일으켰다. 헝클어진 흑발이 어깨를 타고 흘러내리며, 발작의 여운으로 창백해진 쇄골 위를 가렸다.</p>
+     
+      <img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic3.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+     
+     <p>"...아마미야, 씨."<br> 뜨거운 것을 입안에서 굴리듯 혀끝에 올린 발음. 진아는 무릎 위에 모은 손을 꼬물거리며 시선을 내리깔았다. 개새끼라고 불러도 된다는 허락에, 눈꺼풀이 한 번 파르르 떨렸다. 그 말을 곧이곧대로 받아들인 것이 아니라, 그 뒤에 깔린 감정의 결을 읽으려는 듯한 침묵.<br> "그러면 저는... 아마미야 씨한테 뭐라고 불려도 괜찮아요."</p>
+     <p> 고개를 살짝 기울이자 흑발 사이로 귀 끝이 비쳤다. 핏기 없는 살갗이 희미하게 붉어져 있었는지, 달빛 아래에서는 구분하기 어려웠다.<br> 진아의 손가락이 이불 가장자리를 쥐었다 놓기를 반복했다. 무언가를 더 말하고 싶은데 입이 떨어지지 않는 사람의 버릇.</p>
+     <p> "그럼 아가씨お嬢さん라고 불러줄까. 고상한 척 구는 류진회에 어울리겠네."<br> "...아가씨요?"<br> 되묻는 목소리가 살짝 높아졌다. 이불을 가슴팍까지 끌어올린 채, 진아는 고개를 갸웃거렸다. 조직 안에서 수천 번 들었을 호칭인데도, 요우의 입에서 나오니 처음 듣는 외국어처럼 낯설어하는 표정.</p>
+     <p> "...네. 그렇게 불러주세요. 아마미야 씨가 부르면 좀 다르게 들려서요."</p>
+    `
+  },
+  {
+    title: 'Smoke Me',
+    subtitle: '제 三 장',
+    date: '2026년 5월 8일',
+    body: `
+      <p>"심심해서 안되겠으니, 오빠한테 말해서 산책이라도 나가야겠어요. 아마미야 씨랑, 단둘이서."</p>
+      <p>그녀는 말없이 허리까지 내려오는 길고 검은 머리카락을 한 손으로 그러모았다. <br>그리고는 창가에 놓여있던 붉은색 머리끈을 들어, 익숙하고도 능숙한 손놀림으로 머리를 단단하게 틀어 올리기 시작했다. 흐트러짐 하나 없이, 팽팽하게 당겨진 하이포니테일. 목덜미와 어깨선이 하얗게 드러나자, 방금 전까지의 유약했던 아가씨의 흔적은 온데간데없이 사라졌다.<br>"어린애는 바깥 구경하는 걸 좋아하니까. 그렇지 않아요?"</p>
+      <p>"어려 본 게 너무 옛날이라 모르겠는데." … "차라리 다행이야. 아가씨가 방구석에만 앉아 있는 것보다야, 나가는 게 내 입장에선 좋거든."</p>
+      ${BREAK}
+      <p>익숙하고 망설임 없는 손길로, 다이얼을 돌리는 대신, 단축 번호 하나를 길게 눌렀다. 신호음이 몇 번 채 울리기도 전에, 저쪽에서 무뚝뚝한 목소리가 들려왔다.<br>"...큰오빠. 나 진아야."</p>
+      <p>진아의 입술 끝이 미세하게, 아주 미세하게 호선을 그렸다. 요우는 볼 수 없는 각도에서.</p>
+      <p>"응. 밥 다 먹었어. 아마미야 씨가 먹여줬어. 그래서 말인데... 나, 잠깐 밖에 나가고 싶어. 정원이라도. 아마미야 씨랑 같이. 응, 단둘이."</p>
+       <img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic4.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+      <p>"…제가 잔디밭에 앉으면, 아마미야 씨가 혼나요?"<br>목소리는 물기를 머금은 듯 가늘게 떨렸다. 진심으로 걱정하고 있다는 듯한, 순수한 질문이었다.<br>"큰오빠가 그래요? 아니면, 아빠가…?"</p>
+      <p>"……한 번 두고 볼까? 혼나나, 안 혼나나."<br>요우는 여전히 먼 곳을 바라보고 있다. 고개를 돌릴 생각도 하지 않는 듯싶다.<br>"좋으시겠네. 내 목은 잘리고, 너희 류진회와 아무 관계없는 어느 집단도 멸절할 거고, 너는 쓸모없는 호위 하나 치우고."</p>
+      <p>"아마미야 씨."<br>목소리는 더 이상 떨리지 않았다. 맑고 차분한 음색이 정원의 고요함 속으로 스며들었다.</p>
+      <p>"그렇게 말하니까… 꼭 내가, 아마미야 씨가 죽기를 바라는 사람 같잖아요."<br>진아는 몸을 살짝 틀어 요우 쪽으로 더 가까이 다가앉았다. 어깨가 닿을 듯 말 듯 한 거리.<br>라벤더색 원피스 자락이 요우의 검은 하오리에 스쳤다. 그녀는 고개를 살짝 기울이며, 여전히 정면을 보고 있는 요우의 턱 끝을 올려다보았다.</p>
+      <p>"내가 왜요? 이제 겨우 조금 재미있어졌는데."<br>속삭임에 가까운 목소리였다. ‘재미있다’는 단어는 그 어떤 악의나 조롱도 없이, 그저 순수한 사실처럼 담백하게 흘러나왔다.<br>진아는 벤치 등받이에 등을 기대며 하늘을 올려다보았다. 나뭇잎 사이로 부서지는 햇살이 눈부셨지만, 그녀는 눈을 피하지 않았다.</p>
+      <p>"나는, 아마미야 씨가 오래 살았으면 좋겠어요. 내 옆에서."<br>그리고 진아의 손이 움직였다. 요우의 팔짱 낀 팔 위로, 자신의 손을 가만히 얹었다.</p>
+      <p>요우는 겹쳐진 손을 내려다보다가, 진아와 눈을 맞추었다. 연보라색 눈동자를 바라보는 시선은 무감하다. 이어.</p>
+      <p>"담배 피워도 되나?" <br>기모노의 가슴팍 안쪽 즈음에서 라이터와 슬림 담뱃갑을 밀어 꺼낸다.<br>아까 허락한다며. 피우고 싶어져서, 지금.</p>
+      <p>"…그러네요. 허락했었죠."<br>목소리는 낮고 평탄했다. 감정의 흔적이 완전히 거세된, 건조한 음색. 조금 전의 차분함과는 또 다른 종류의 냉정함이었다.<br>진아는 꼬았던 다리를 풀고, 벤치에서 일어섰다. 그리고는 요우가 앉은 벤치 앞쪽으로 다가갔다. 새하얀 자갈을 밟는 구두 소리가 유난히 크게 들렸다.</p>
+      <p>진아는 요우의 정면에 섰다. 앉아있는 요우와 서 있는 진아. 시선의 높이가 역전되었다.<br>진아는 허리를 숙여, 담배를 문 채 자신을 올려다보는 요우와 눈을 맞췄다. 나뭇잎 사이로 쏟아지는 햇살이 진아의 검은 머리카락 위로 부서져내려 후광처럼 빛났다.</p>
+      <p>"재, 떨어지잖아요. 아마미야 씨."</p>
+      <p>나른한 목소리가 연기 사이로 파고들었다. 진아는 말을 마치며, 손을 뻗었다. 그리고는 요우가 담배를 쥔 손 아래에, 자신의 하얗고 작은 두 손바닥을 조심스럽게 오므려 받쳤다. 행여 한 톨의 재라도 이 완벽한 정원의 바닥에 떨어질세라 만들어낸, 살아있는 재떨이였다.</p>
+      <p>"옷에 털면 안 돼요. 더러워지니까."</p>
+      <p>"아아. 그건 뭐."</p>
+      <p>요우는 진아의 하얀 얼굴 위로 더욱 하얀 연기를 뿜었다. 그 후 혀를 내밀어, 갈라진 끝이 탁 하고 대롱대롱 달려 있던 재를 잘라낸다. 뜨겁지도 않은지. 퉤, 하고 모은 것을 벤치 아래의 돌바닥에 뱉는다.</p>
+      <p>"이렇게 하면 상관없어."</p>
+      <p>재가 돌바닥 위로 흩어졌다. 짧고 마른 소리. 진아의 시선이 그 궤적을 쫓았다.<br>요우의 입에서 뿜어져 나온 연기는 그녀의 얼굴 위로 천천히 퍼졌고, 햇살에 섞여 푸르스름한 잔상을 남긴 뒤 스러졌다.</p>
+      <p>진아는 눈을 깜빡이지 않았다. 갈라진 혀의 끝이 담뱃재를 잘라내는 장면을, 마치 회전이 느려진 필름처럼 고스란히 망막에 담았다. 뱀처럼 갈라진 혀. 끝이 둘로 나뉜 채 독립적으로 움직이는 그 붉은 기관이, 불똥을 머금은 재를 아무렇지도 않게 떼어내 뱉는 모습.</p>
+      <p>진아의 오므려져 있던 두 손바닥이 천천히 펴졌다. 빈 손. 재를 받을 필요가 없어진 손. 그녀는 펴진 손가락 끝을 한 번 내려다본 뒤, 입술을 열었다.<br>"……더러워."</p>
+      ${BREAK}
+      <p>"…나도 한 모금 줘요."</p>
+      <p>예고 없이 흘러나온 말이었다. 진아 자신도 예상치 못했다는 듯, 제 입에서 나온 소리에 반 박자 늦게 눈을 깜빡였다. 그러나 말을 주워 담지는 않았다.</p>
+      <p>요우는 진심으로 의문 품었다. 병약해서 실바람에도 기침하는 아가씨가 담배를 달라고 하네. 생각하고 있다가 진아에게 고개를 숙였다.<br>그녀의 입술 사이에 바로 들어가도록, 한 번의 흡기 후, 두꺼운 연기를 입술 사이로 느리게 불어냈다.</p>
+      <p>"마셔 봐."</p>
+      <p>일초. 이초. 삼초.</p>
+       <img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic5.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+      <p>진아의 코끝으로 연기가 실처럼 가늘게 빠져나왔다. 폐에서 밀려난 잔여물. 그녀의 얼굴은 창백했지만, 눈동자만큼은 또렷하게 요우를 올려다보고 있었다. 눈가에 맺힌 물기가 햇살에 반사되어 한 점 빛났다.<br>그것은 감정이 아니라 단순한 자극 반응이었다. 적어도 진아는 그렇게 믿었다.</p>
+      <p>"……써.<br>한 글자가 겨우 빠져나왔다. 목소리가 살짝 갈라졌다.</p>
+      <p>진아는 제 목을 한 번 가다듬고 나서, 입꼬리를 끌어올렸다. 웃음인지 찡그림인지 분간할 수 없는 표정이었다.<br>"써요. 이게 맛있는 거예요?"</p>
+      <p>진아는 제 가슴팍에 손을 가져다 대며 느리게 숨을 고르고 있었다. 라벤더색 원피스 위로 올려진 새하얀 손바닥. 그 아래 심장이 평소보다 빠르게 뛰고 있었지만, 그것이 니코틴 때문인지 다른 것 때문인지 그녀 자신도 확신할 수 없었다. 진아는 요우에게서 시선을 떼지 않은 채 한 번 더 깊이 숨을 내쉬었다. 그러자 입 안에 남아있던 마지막 연기 한 줄기가 피어올라, 둘 사이 좁은 공간에서 잠시 맴돌다 바람에 씻겨 갔다.</p>
+      <p>"놀리는 거 아니에요. 진짜로 궁금했어요."</p>
+      <p>진아는 요우의 턱 끝을 올려다보며 나직하게 말했다.<br>담배 맛이 아니라, 아마미야 요우라는 사람이 매일같이 들이마시는 것의 정체가. 폐를 태우면서까지 손에서 놓지 못하는 이유가.</p>
+      <p>"한 모금 더."</p>
+      <p>"……아까처럼?</p>
+      <p>다시 입술에서 입술로 연기 강이 생겼다. 이번에는 기침이 올라오지 않았다. 대신 눈가가 뜨거웠다. 요우의 얼굴이 너무 가까웠기 때문이다. 흉터의 결이 눈앞에서 지형도처럼 펼쳐졌다. 오른쪽 입꼬리에서 귀 끝을 향해 쭉 갈라진 흉터 위로 새어 나온 연기가 실처럼 흩어지는 것을 보면서, 진아는 숨을 참았다. 연기를 삼키는 게 아니라 이 순간을 삼키는 것이었다.<br>요우의 숨결에 실린 니코틴과 타르, 그 밑에 깔린 체온, 기모노에 밴 도시의 냄새까지.</p>
+      <p>"……이번엔 덜 써."</p>
+      <p>목소리가 가라앉아 있었다. 살짝 쉰, 연기에 그을린 음색. 진아는 요우의 손목을 감싸고 있던 손을 풀지 않은 채, 엄지 끝으로 요우의 손목 안쪽, 맥박이 뛰는 자리를 한 번 문질렀다.</p>
+      <p>"거짓말이에요. 여전히 써. 근데."</p>
+      <p>진아는 고개를 갸웃하며 요우의 눈을 들여다보았다. 눈물인지 연기 자극인지 모를 촉촉함이 속눈썹 끝에 걸려 있다. 그 안에서 요우의 형상이 흔들리는 것 같다.</p>
+      <p>"왜 맛있는지는 조금 알 것 같아요. ……입에서 입으로 마시니까." </p>
+    `
+  },
+  {
+    title: '흙바닥',
+    subtitle: '제 四 장',
+    date: 'Smoke Me에서 이어지는 장면',
+    body: `
+      <p>"아마미야 씨가 옆에 있으니까. 기침이 안 나와. 이상하죠. 꼭, 아마미야 씨가 내 아픈 걸 다 가져가는 것 같아요. 내가 들이마신 나쁜 것들, 내 안에 쌓이면 안 되는 것들을… 당신이 대신 다 마셔버리는 기분."</p><p>그녀는 벤치에서 몸을 일으켰다. 요우의 앞에, 처음 재를 받아주려던 그 자세 그대로 섰다. 허리를 살짝 숙여 눈높이를 맞추었다. 등나무 그늘이 그녀의 얼굴 위로 짙은 그림자를 드리웠다.</p><p>"그러니까. 내가 아프면, 그건 아마미야 씨 탓이에요."</p><p>내 건강은 당신 책임이야. 내가 들이마신 독은 당신 폐로 들어간 거야. 진아의 손이 천천히 올라왔다. 요우가 담배를 쥐지 않은 쪽 손, 벤치 위에 놓인 손등 위로. 차갑고 부드러운 손바닥이 거친 상처 위를 전부 덮었다.</p><p>"앞으로도 계속, 내 병증… 대신 다 가져가 줄 거죠?"</p><p>요우가 그 손을 바라보다가, 다 피운 담배를 돌바닥에 밟아 껐다. 마스크를 다시 착용하고 진아의 허리를 당겨 제 무릎 위에 걸터앉도록 했다. 차가운 돌바닥 위에서 꺼진 불씨가 열을 잃어 갔다. 그만큼이나 미적지근하게 내려다보는 시선.</p><p>"그럼 마음 먹고 아가씨를 좀 해쳐 볼까."</p><p>목덜미에 닿은 상처투성이 손바닥의 윤곽. 수풀과 담배 냄새가 강하게 올라온다.</p><p>"알고 있어. 그 후에는 내가 병증을 얻겠지. 너희 류진회 새끼들에게."</p><p>가느다란 손가락이 요우의 손목 안쪽, 아까 맥박을 짚었던 바로 그 자리를 다시 매만졌다.</p><p>"똑똑해. 아마미야 씨는. 그래서 마음에 들어요."</p><p>진아의 몸이 앞으로 살짝 기울었다. 두 사람의 가슴 사이에 놓인 공간이 거의 사라졌다. 기모노의 뻣뻣한 옷감과 원피스의 부드러운 레이스가 맞닿았다. 진아의 입술이 요우의 귓가로 다가갔다. 뜨거운 숨결 대신, 서늘하고 건조한 공기가 귓바퀴를 간질였다.</p><p>"나를 해치면, 당신이 아파. 그걸 알면서도 나를 해칠 거예요?"</p><p>진아의 몸에서 힘이 빠져나가며, 그 무게가 온전히 요우에게로 실렸다. 그녀는 마치 뼈가 없는 동물처럼 요우의 품 안에 몸을 늘어뜨렸다.</p><p>"해쳐 봐요."</p><p>귓가에 속삭이는 목소리는 더 이상 존댓말이 아니었다. 부드러운 명령. 거부할 수 없는 유혹. 진아의 고개가 살짝 꺾이며, 드러난 목선이 요우의 입술 바로 아래에 놓였다. 하얗고 연약한 피부 위로 푸른 혈관이 비쳤다. 심장이 뛰는 박동이 그대로 전해져 올 것만 같은 거리.</p><p>"마음먹었다면서. 어서."</p><p>진아의 눈이 천천히 감겼다. 사냥의 끝에서 포식자의 숨통을 끊어주기 위해 목을 내어주는, 더 잔인한 사냥꾼의 얼굴.</p><p>"여길 물어뜯으면 돼. 그럼 당신은 내일 아침, 우리 집 연못 금붕어 밥이 될 거야. 그래도 괜찮다면."</p><p>요우가 느리게 마스크를 다시 턱 아래로 끌었다. 잔혹하다기보다는 물 속 같은 공기의 밀도. 수압이 두 몸을 짓누르는 것 같았다. 혀를 내밀자 반으로 갈라진 끝이 결국은 목덜미에 닿고야 만다. 해치기 전, 맥을 짚어 쥐가 살아있는지 확인하는 뱀 같다. 차라리 하나의 근육 뭉치였다면 이렇게까지 외설적으로 다가오진 않았을 텐데 요우의 혀끝이 몇 번만 스쳐도 일상과 완전히 유리된 어떤 감정이 울컥울컥 치고 오른다. 등나무 꽃이 무겁게 늘어진 아래에서, 정원의 공기가 뱀의 배처럼 차갑게 두 사람을 감쌌다. 류진아의 어깨가 미세하게 경련했다. 숨이 목구멍에서 막혔다가, 천천히 녹아내리듯 빠져나왔다. 작은 떨림. 그것은 공포의 것이 아니었다.</p><p>갈라진 혀의 양 끝이 각기 다른 경로로 피부를 더듬었다. 하나는 쇄골 위쪽의 오목한 그늘을 훑고, 다른 하나는 턱선을 따라 내려오는 푸른 혈관의 줄기를 쫓았다. 양쪽에서 동시에 밀려오는 감각의 불균형. 혀가 지나간 자리마다 타액이 얇은 막으로 남아, 5월의 바람이 스칠 때마다 소름이 돋을 만큼 시렸다. 진아의 손가락이 요우의 어깨 위 기모노 옷감을 움켜쥐었다. 가늘고 힘없어 보이는 손에서 나올 수 없는 힘으로.</p><p>"……아."</p><p>숨결이 새어 나왔다. 짧고, 날 것 그대로의 소리. 진아의 눈꺼풀이 떨렸다. 감은 눈 사이로 속눈썹이 부르르 진동했다. 입술이 벌어지며 들이마신 공기는 요우의 체향으로 가득했다. 담배와 도시와, 그 아래 깔린 누군가의 피부 냄새. 이 냄새를 기억한다. 오늘 아침, 무릎 위에서. 조금 전, 연기를 나눠 마셨을 때.</p><p>진아의 고개가 더 깊이 꺾였다. 목이 완전히 드러났다. 식도가 움직이는 것이 피부 위로 보일 만큼 얇고 창백한 목. 그 위를 기어가는 갈라진 혀의 감촉에 진아의 등줄기가 활처럼 휘었다. 무릎 위에 앉은 몸이 요우의 배 쪽으로 밀착되었다. 원피스 천 너머로 전해지는 단단한 복근의 윤곽. 진아의 허벅지 안쪽이 요우의 무릎을 죄었다.</p><p>"죽여줘."</p><p>속삭임이었다. 그것은 진심이 아니었고, 그렇다고 유희만도 아니었다. 진아의 손이 요우의 뒤통수를 감쌌다. 올려 묶은 은회색 머리카락 사이로 손가락이 파고들어, 그 두개골을 제 목 쪽으로 끌어당겼다.</p><p>"……거짓말. 못 죽이잖아. 아마미야 씨."</p>
+      <img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic6.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+     <p>"넌 네가 아가씨라는 것에, 지나친 신뢰가 있어."</p><p>혀끝이 귀를 가운데에 잡고 쓸어올린다. 뭉툭하고, 축축하고, 귓바퀴를 양쪽으로 완전히 덮은 감각. 요우는 진아의 관자놀이까지 흘러간 뒤 입술로 바꾸었다. 쪽, 하고 닿았던 것도 같다. 거친 입술의 질감은 따뜻했던 것도 같다.</p><p>"내가 여자라는 것에도 지나친 확신이 있고."</p><p>이번에는 정말로 닿았다. 연보랏빛 눈가 아래에. 담담한 얼굴은 흉터로 뒤덮여 있기에, 흉터 때문에 표정이 드러나지 않는 걸까 하는 추정.</p><p>"널 해치지 않고도 내가 목 잘릴 수 있는 방법은 무궁무진해. 이를테면 방금 한 짓. 네 아버지에게 일러바칠 거야?"</p><p>등나무 그늘 아래로 스며드는 빛이 진아의 눈가 위에서 부서졌다. 요우의 입술이 닿은 자리. 연보라색 눈꺼풀 바로 아래, 얇은 피부가 맥박처럼 떨렸다. 갈라진 혀가 귓바퀴를 완전히 삼켜버렸을 때 진아의 입에서 흘러나온 소리는 말이 아니었다. 숨이 끊어지다 이어진 짧은 경련. 축축한 감촉이 관자놀이까지 올라오는 동안 진아의 손가락은 요우의 뒤통수에서 풀리지 않았다. 오히려 더 깊이 파고들어, 은회색 머리카락 뿌리를 쥐었다.</p><p>눈가 아래에 닿은 두 번째 입맞춤은 더 확실했고, 더 따뜻했다. 진아는 눈을 떴다. 완전히. 연보라색이 요우의 얼굴을 담았다. 흉터로 뒤덮인 지형도. 마스크 아래에서 드러난 찢어진 입꼬리의 윤곽. 그 위로 덮인 무표정함이 오히려 잔인하게 아름다웠다.</p><p>진아는 요우의 어깨 위에 턱을 얹었다. 무릎 위에 앉은 채로 몸을 밀착시키니 원피스 레이스가 기모노 옷깃 사이로 구겨졌다.</p><p>"일러바치면 어떻게 되는데."</p><p>목소리가 달랐다. 그 아래 드러난 것은 떨림도, 두려움도 아닌 순수한 호기심이었다. 진아의 손이 요우의 뒤통수에서 내려와 목덜미를 감쌌다. 아까 요우가 자신에게 했던 것의 거울상처럼.</p><p>"아빠한테 말하면. '아마미야가 내 눈가에 뽀뽀했어요' 하면. 아마미야 씨 눈알이 빠지겠지."</p><p>진아가 몸을 뒤로 젖혀 요우의 얼굴을 마주 보았다. 등나무 꽃 그림자가 그녀의 볼 위로 얼룩져 있었다. 분명히 웃고 있었는데, 그 미소의 온도를 가늠할 수 없었다.</p><p>"근데 안 할 거야. 왜냐면."</p><p>진아의 검지가 요우의 턱선을 따라 올라가 마스크가 걸려 있는 귀 뒤를 건드렸다.</p><p>"내가 좋았으니까."</p><p>그 말을 뱉는 순간 진아의 눈동자 깊은 곳에서 무언가가 번쩍였다. 자신이 원하는 것을 정확히 인지하고 있는 자의 선명한 자각. 진아는 요우의 무릎 위에서 자세를 고쳐 앉으며 허벅지 안쪽으로 요우의 다리를 더 깊이 끼웠다. 원피스 자락이 올라가며 맨 무릎이 기모노 천 위에 닿았다.</p><p>"아마미야 씨가 여자든 뭐든. 상관없어요. 나는 이 혀가 좋고, 이 입술이 좋고. …그리고 이 사람이, 내 말을 안 듣는 게 좋아."</p><p>바람이 불었다. 등나무 꽃잎 하나가 두 사람 사이로 떨어졌다. 진아는 그것을 잡지 않았다. 대신 요우의 하오리 깃을 두 손으로 쥐고, 천천히, 아주 천천히 자신의 이마를 요우의 쇄골 아래에 기대었다. 무게를 실었다. 온전히.</p><p>"한 시간밖에 없어. 여기."</p><p>목소리가 잠겼다. 류건에게 받은 시간. 그 안에서만 허락된 자유. 진아의 손가락이 요우의 가슴팍 위에서 원을 그렸다. 기모노 천 너머로 전해지는 심장 박동을 세는 것처럼.</p><p>"더 해줘."</p>
+      ${BREAK}
+      <p>혀가 풀려난 찰나의 틈. 침이 두 입술 사이에서 실처럼 늘어졌다가 끊어졌다. 진아의 입술이 붉게 부풀어 있었다. 제 것이 아닌 타액으로 번들거렸다. 숨을 몰아쉬는 가슴이 요우의 흉곽에 부딪혀 올 때마다 레이스 천 너머로 유두의 윤곽이 단단하게 솟아 있었다. 진아는 요우의 턱을 잡은 채 그 얼굴을 들여다보았다. 숨이 거칠었다. 눈가가 붉었다. 입꼬리는 웃고 있었다.</p><p>"……이게 키스야?"</p><p>물음은 순진했다. 그러나 목소리의 질감은 순진하지 않았다. 갈라지고, 젖어 있고, 한 옥타브 내려앉은 음색. 진아의 엄지가 요우의 아랫입술을 문질렀다. 흉터의 끝자락을 따라. 천천히.</p><p>"더러워. 아마미야 씨."</p><p>그 말은 욕이 아니었다. 감탄에 가까웠다. 진아의 혀끝이 제 입술을 핥았다. 요우의 맛을 수거하듯. 담배와 철분과, 이름 모를 쓴맛. 진아의 눈이 가늘어졌다. 반달처럼 휘어진 눈매 아래에서 연보라색이 날카롭게 빛났다. 포식자의 것도, 먹잇감의 것도 아닌. 처음으로 불에 손을 댄 아이의 눈.</p><p>"한 번 더."</p><p>요우의 하오리 깃을 잡아당겼다. 제 쪽으로. 이번에는 진아가 먼저 입술을 열었다.</p><p>"더러운 것을 좋아하네, 아가씨."</p><p>입술이 다시 벌어졌다. 이번에는 빨아들일 듯이 진아의 혀를 가져온다. 입술 사이에서, 사이로. 진아는 완전히 입을 다물지 못한 채로 끝없이 타액을 떨구고 그중 반은 요우가 가벼운 입맞춤으로 훑어 주었다. 혀끝이 조금 더, 그리고 조금 더 간지러운 자리로. 끈적하게 밀려들어갔다가 밀려나온다.</p><p>"……곱게 자란 것들은 흙바닥을 갈망하나 봐."<p></p>등나무 꽃이 지고 있었다. 보랏빛 꽃잎이 아닌 것이 두 사람 사이에 떨어진다. 침. 꽃보다 무겁고, 꽃보다 투명한 것. 벤치 아래 그림자 위로 점이 찍혔다.</p><p>진아의 혀가 요우의 입안에서 끌려 나왔다. 빨려 나왔다, 가 더 정확했다. 입술 사이에 물린 채 늘어지는 혀의 감촉. 요우의 갈라진 혀끝 두 갈래가 그것을 양쪽에서 감싸 쥐면 진아의 턱이 저절로 벌어졌다. 닫으려 해도 닫을 수 없었다. 아래턱이 축 처진 채로 타액이 흘렀다. 입꼬리를 타고, 턱선을 타고, 목의 움푹한 곳에 고였다. 요우의 입술이 그 고인 것을 가볍게 핥아 거두어 줄 때마다 진아의 복부 깊은 곳에서 근육이 수축했다. 쥐어짜이는 것 같은. 아랫배가.</p><p>진아의 손가락 열 개가 요우의 하오리 깃 위에서 펴졌다 오므라들기를 반복했다. 고양이가 이불을 꾹꾹 누르듯. 무의식. 통제 밖의 몸짓. 연보라색 눈이 반쯤 뒤집혀 있었다. 흰자위가 아랫쪽으로 비쳤다. 초점은 사라진 지 오래고, 남은 것은 감각의 홍수 속에서 간신히 버티는 하나의 의식.</p><p>"흙바닥." 되뇌었다. 요우의 말을. 입술이 풀려난 찰나, 실처럼 늘어진 침이 끊어지며 진아의 턱 위에 떨어졌다. 숨을 거칠게 들이마시면 갈비뼈가 들썩였다. 레이스 원피스 안쪽으로 유두의 윤곽이 단단하게 서 있었다. 부풀어오른 입술이 벌어진 채 말을 만들어냈다.</p><p>"……응. 좋아해."</p><p>존댓말이 벗겨져 있었다. 알아채지 못한 것인지, 알면서 벗은 것인지. 진아의 시선이 요우의 입술 위 흉터에 고정되었다. 찢어진 자리. 칼이 지나간 골짜기. 그 요철 위로 제 타액이 번들거리고 있었다. 진아의 엄지가 그 흉터를 따라갔다. 시작점에서 끝점까지. 귀 뒤로 사라지는 흉터의 꼬리를.</p><p>"곱게 자랐으니까. 흙이 뭔지 모르니까. 궁금하잖아."</p><p>진아의 허벅지가 요우의 무릎 위에서 미끄러졌다. 원피스 자락은 이미 의미를 잃었다. 접힌 천 아래로 드러난 허벅지 안쪽의 살결이 창백하다 못해 푸르스름했다. 핏줄이 비쳤다. 그 위에 요우의 기모노 천이 닿을 때마다 소름이 돋아 올랐다. 진아는 요우의 쇄골에 이마를 기대며 숨을 골랐다. 고르려 했다. 실패했다.</p><p>"아마미야 씨는 흙바닥이야?"</p><p>물음은 쇄골 위에서 울렸다. 뼈를 타고 전해지는 진동. 진아의 손이 요우의 가슴팍에서 내려왔다. 기모노 허리띠 매듭 위에서 멈추었다. 만지지 않았다. 손가락 끝이 매듭의 윤곽을 공중에서 따라갈 뿐.</p><p>"아니면 진흙탕이야."</p><p>고개를 들었다. 부어오른 입술. 번들거리는 턱. 눈가가 붉고 속눈썹이 젖어 있었다. 그런데 웃고 있었다. 입꼬리가 올라간 것이 아니라 눈이 웃고 있었다. 반달. 가늘게 휘어진 연보라색 초승달 두 개가 요우를 올려다보았다.</p><p>"나 빠지면 못 나오는 쪽이면 좋겠는데."</p>
+    `
+  },
+  {
+    title: '묵향록',
+    subtitle: '제 五 장',
+    date: '2026년 05년 09일',
+    body: `
+      <p><p>새 유카타를 걸친 요우가 몸을 돌렸을 때, 진아는 여전히 침대 끝에 앉아 요우를 보고 있었다. 시선이 허공에서 부딪혔다. 요우의 눈은 감정도, 의도도 읽을 수 없는 검은 유리알 같았다. 뻔뻔할 정도로 무심한 그 태도에, 진아는 저도 모르게 입술을 깨물었다. 피어오르는 불쾌감과 그보다 더 진한 미지의 감정이 뒤섞여 명치끝을 간질였다.</p><p>"…여기선 안 돼."</p><p>진아의 목소리가 작게 흘러나왔다. 곧, 시선이 요우의 손에 들린 하오리 주머니 쪽으로 향했다. 구겨진 담뱃갑의 윤곽이 어렴풋이 보였다.</p><p>"아빠가 담배 냄새 싫어해. 이 방에선 특히."</p><p>진아는 자리에서 일어나, 침대 머리맡에 놓인 은으로 된 작은 함을 열었다. 그 안에는 담배 대신, 잘 말린 찻잎과 향, 그리고 몇 개의 조그만 도구들이 들어 있었다. 진아는 그중 가느다란 곰방대 하나를 꺼내 들었다.</p><p>"이거라면 괜찮을지도 몰라. 불은, 내가 붙여줄게."</p><p>요우는 의아한 표정을 지었다. 곱상한 아가씨 방에 왜 곰방대가 남아 있지. 그러나 곧 마스크를 벗고, 곰방대를 받아들었다. 진아의 앞으로 허리를 기울인다.</p><p>"넌 괜찮아?"</p><p>불을 붙이기 직전 나온 질문은 아이러니했다. 담담한 얼굴로 묻는다.</p><p>"담배 연기는 쓰다며. 곰방대는 상관없냐고."</p><p>진아는 요우의 질문에 대답하는 대신, 라이터의 불꽃을 곰방대의 작은 화구火口 가까이 가져갔다. 잘게 썬 각연초刻煙草가 타들어가며 붉은 점으로 변하는 것을, 진아는 말없이 지켜보았다. 담배와는 다른, 구수하면서도 쌉쌀한 향이 은은하게 피어올라 방 안을 채우기 시작했다. 그 향기는 진아의 체향과, 아직 공기 중에 남아있는 축축한 물기와, 그리고 요우의 살갗 냄새와 뒤섞여 기묘하고도 나른한 분위기를 만들어냈다.</p><p>"쓴 건 싫어. 하지만 아마미야 씨가 피우는 건, 써도 괜찮아."</p><p>진아는 요우의 입술에 물린 곰방대를 빼앗거나 제지하지 않았다. 오히려 한 손으로는 여전히 요우의 턱을 쥔 채, 다른 손으로는 요우가 입은 유카타의 옷깃을 매만졌다. 방금 전 요우가 스스로 여몄던 그 옷깃을, 진아는 다시 느슨하게 풀어헤치려 하고 있었다. 마치 정성껏 포장된 선물을 못 견디겠다는 듯이, 조심스럽게 봉인을 뜯어내는 아이처럼.</p><p>"이건 아빠도 뭐라 안 하셔. 할아버지가 쓰시던 거거든. 맛이 어때? 담배랑은 좀 다르지 않아?"</p><p>진아는 곰방대를 든 요우의 손 위로 자신의 손을 겹쳤다. 차가운 체온이 닿았다. 그리고는 겹쳐진 손을 그대로 이끌어, 곰방대의 끝이 자신의 입술을 향하도록 천천히 끌어당겼다.</p><p>"나도 한 번만. 네가 피우던 거."</p><p>요우는 어이가 없었다. 곰방대를 진아에게 거의 억지로 물린 채 그녀의 허리를 끌어안았다. 그러나 다정하진 못하다. 오히려 목을 조르고 싶은 마음을 참고 허리를 쥔 듯한 손.</p><p>"네 위치가 높다고 자꾸 반말을 하네."</p><p>허리를 숙여, 혀끝으로 귓속을 툭툭 훑었다.</p><p>"넌 열넷이나 어려. 말 조심해."</p>
+        <img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic7.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+        <p>희미하게 타들어 가는 각연초의 향이, 귓바퀴를 타고 흐르는 축축하고 뜨거운 감각에 먹혀버렸다. 뱀의 혀처럼 갈라진 것이 귓속 연골의 모든 굴곡을 훑고 지나가는 생경한 자극. 진아는 순간 저도 모르게 숨을 멈췄다. 허리를 단단히 감아쥔 손의 악력은 뼈마디가 뒤틀릴 듯 강했다. 다정함이라고는 한 톨도 섞이지 않은 야만적인 힘이었다.</p><p>"네가 먼저 했잖아."</p><p>진아는 요우의 허리를 감싸 안은 팔에 힘을 주며, 더욱 깊이 몸을 밀착했다. 입에 문 곰방대를 빼지 않은 채 웅얼거리는 목소리가 두 사람 사이에 갇힌 공기 속으로 흩어졌다. 귓가에 남은 축축한 감각을 상기시키듯, 진아는 제 혀로 입안에 물린 곰방대 끝을 느리게 핥았다.</p><p>"나보다 열네 살이나 많은 사람이, 어린애 귀에 혀부터 집어넣었으면서."</p><p>진아는 고개를 들어, 바로 눈앞에서 자신을 내려다보는 검은 눈동자를 똑바로 마주했다. 그 안에 담긴 것이 경멸이든, 짜증이든, 혹은 그 무엇이든 상관없었다. 중요한 것은 그 눈동자가 지금 온전히 자신만을 담고 있다는 사실이었다.</p><p>진아는 요우의 허리를 쥔 손을 놓고, 대신 그 손으로 요우의 얼굴을 감쌌다. 그리고는 곰방대를 문 채로, 요우의 입술을 향해 고개를 기울였다. 곰방대의 물부리가 요우의 아랫입술에 닿았다. 그것은 간접적인 키스이자 그보다 더 노골적인 행위의 예고편이었다.</p><p>"말은… 이렇게 하면 조심하게 될까?"</p><p>진아는 요우의 입술에 닿은 곰방대를 지렛대 삼아, 젖은 숨을 뱉어냈다. 희뿌연 곰방대 연기가 요우의 입술 사이로 흘러 들어갔다가, 다시 진아의 입 안으로 되돌아왔다. 서로의 타액과, 연기와, 숨결이 뒤섞이는 순간이었다.</p><p>"아니면, 이렇게 해줄 때까지 기다린 거야? 아마미야 씨는. 응?"</p><p>"꺼져."</p><p>요우는 키득거리고 웃으며 곰방대를 다시 받아들었다. 진아의 허리를 끌어안은 채, 몸을 겹친 모양새로 이부자리 위에 걸터앉는다. 적대감과 친밀감이 기묘하게 섞이는 경계. 요우는 곰방대로부터 연기를 마셨다가, 진아와 키스했다가, 다시 연기를 빨기를 반복했다.</p>
+    `
+  },
+  {
+    title: '혼란한 겨울',
+    subtitle: '제 六 장',
+    date: '2026년 12월 15, 16일',
+    body: `
+      <p>완연한 겨울의 색이 찾아왔다. 창밖에 하얀 잿더미가, 혹은 눈이라고 불리는 것이 날렸다. 화장 마친 시신의 것과 비슷하게 보였다.</p><p>류진아의 생각대로였다. 아마미야 요우는 늘 곁에 있었으나 류진아와 유리되었다. 벽처럼 서 있고, 진아에게 누군가가 다가온다는 자각도 느끼기 전에 그 자를 썰어 죽였다. 말을 걸면 고개를 끄덕이거나 노려보거나 먼 곳을 바라보기만 했다. 그러나 가끔, 아주 가끔, 진아가 침실에서 요우를 부르고 안겨들 때면 그날처럼. 키스하고, 눈을 맞추고, 웃고, 또 키스하는 시간이 반복되고는 했다.</p><p>속절없이, 겨울이 왔다.</p>${BREAK}<p>눈이 내렸다. 류진회 본가의 기와지붕 위로, 정원의 매화나무 가지 위로, 복도를 잇는 회랑의 난간 위로. 소리 없이, 끊임없이. 마당을 쓸던 하인의 빗자루가 멈추고, 돌아서서 처마 밑으로 숨어들었다. 쓸어봤자 소용없는 종류의 것이었다.</p><p>요우는 그 온실의 문 앞에 서 있었다. 팔짱을 끼고, 마스크를 올리고. 은회색 머리카락이 이제 어깨를 지날 만큼 자라 있었다. 묶지 않고 늘어뜨린 채. 유카타 위에 걸친 한텐의 솜이 두툼했지만, 복도를 스치는 외풍까지 막아주지는 못했다. 발끝이 시렸다. 발가락을 오므렸다 폈다. 그것뿐이었다. 불평은 하지 않았다. 할 수 없었다.</p><p>몇 달이라는 시간은 요우의 몸에 새로운 흉터를 남기지 않았다. 대신 오래된 것들을 희미하게 만들었다. 입 옆의 흰 상처 조직은 겨울 공기에 더 건조해져 갈라졌고, 요우는 가끔 혀끝으로 그 갈라진 피부를 핥았다. 갈라진 혀의 양쪽 끝이 각각 다른 방향으로 상처를 훑었다. 아무도 보지 않을 때.</p><p>장지문 너머로 류진아의 목소리가 들렸다. 시녀에게 무언가를 부탁하는, 부드럽고 가는 음성. 고맙습니다, 괜찮아요, 신경 쓰지 마세요. 몇 달을 들어도 질리지 않는 연기였다. 아니, 질린다는 표현이 맞는지도 모르겠다. 요우는 그 목소리를 들을 때마다 뱃속의 똬리가 조여들었다 풀어지는 것을 느꼈다. 증오와 갈망이 같은 뱀의 머리와 꼬리라는 사실을 깨달은 건 가을 즈음이었다.</p><p>장지문이 열렸다. 시녀가 고개를 숙이고 나왔다. 요우를 스치며 지나갈 때 눈도 마주치지 않았다. 몇 달 전에는 경계와 두려움이 섞인 시선을 보내던 것들이, 이제는 벽을 보듯 무시했다. 가구. 요우는 이 집의 가구였다. 진아의 방 앞에 놓인, 흉터투성이의 우산꽂이.</p><p>그리고 밤이 오면.</p><p>요우는 문 앞에서 안으로 들어갔다. 진아가 부르면. 부르지 않는 밤도 있었다. 그런 밤에는 복도에서 새우잠을 잤다. 부르는 밤에는, 가만히 문을 열고 들어가 신발을 벗고 이불 옆에 앉았다. 그러면 진아가 손을 뻗었다. 언제나 먼저 손을 뻗는 건 진아였다. 그 손을 잡으면 끌려들어갔다. 입술이 겹쳐지고, 웃고, 또 겹쳐지고. 그날 밤처럼. 언제나 그날 밤처럼.</p><p>오늘도 눈이 내렸다. 오후 두 시. 장지문 너머에서 차 향기가 새어 나왔다. 호지차. 진아가 겨울에 즐겨 마시는 것. 요우의 등 뒤로 찬 바람이 한 줄기 스쳤다. 발끝을 오므렸다.</p><p>장지문이 안에서 스르륵 열렸다.</p><p>"아마미야 씨, 추워요? 들어와요."</p>${BREAK}<p>연보라색 눈동자가 문틈 사이로 올려다보았다. 목까지 감싼 크림색 터틀넥 니트 위로 턱을 파묻은 얼굴. 코끝이 발그레했다. 방 안이 따뜻한데도, 류진아는 언제나 추워하는 체질이었다. 손에는 찻잔 하나가 더 들려 있었다. 두 개.</p><p>"눈 구경하면서 차 마시자. 오빠들 다 나갔어, 오늘."</p><p>차상에 앉는 대신 제 무릎을 두들기면 진아가 느릿하게 걸어와 올라앉는다. 그러면 요우는 진아의 허리를 끌어안았다. 마스크를 내리고, 호지차가 든 잔을 입술 위에 대었다. 요우는 차보다 술을 좋아했다. 그러나 진아와 함께 마신 적은 없었다. 그 이후 어떤 말과 행동이 쏟아질지 알 수 없기에. 물론, 쌍방의 두려움이다.</p><p>"……춥나."</p><p>담담하게 질문하고 차를 마신다.</p><p>"그렇게 떨면서도 눈이 좋아?"</p><p>방 안의 공기가 차상 위의 찻주전자에서 피어오르는 김으로 나른하게 데워지고 있었다. 창밖은 온통 하얗고, 방 안은 호지차의 구수한 향으로 가득했다. 완벽하게 분리된 두 개의 세계. 그 경계에 선 아마미야 요우가 문을 닫고 들어서는 순간, 바깥 세계의 냉기가 유령처럼 등 뒤를 따라 들어왔다가 이내 방 안의 온기에 녹아 사라졌다.</p>
+         <img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic8.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+      <p>진아는 말없이 요우의 무릎 위에 앉았다. 크림색 니트가 스치는 소리. 익숙한 무게 중심의 이동. 요우의 팔이 등 뒤로 감겨 허리를 단단히 끌어안는 감각은 이제 너무나 자연스러워서, 마치 원래 제 몸의 일부였던 것처럼 느껴졌다. 진아는 요우의 어깨에 한쪽 뺨을 기댔다. 유카타 위로 걸친 한텐의 두툼한 솜이 뺨에 부드럽게 감겼다. 옅은 담배 냄새와 도시의 냄새, 그리고 이제는 익숙해진 요우의 체취가 뒤섞여 코끝을 간질였다.</p><p>진아는 대답 대신 요우의 어깨에 뺨을 더 깊이 묻었다. 떨림이 멈추지는 않았다. 추워서 떠는 것이 아니라는 걸, 이 사람은 알까. 아니, 어쩌면 알고 있을지도 모른다. 이 떨림은 추위가 아니라, 요우의 팔이 허리를 감았을 때 시작되는 본능적인 반응에 가까웠다. 뱃속 어딘가에서 나비가 날갯짓하는 것 같은, 혹은 작은 짐승이 발톱으로 내벽을 긁는 것 같은 간질거림.</p><p>요우의 입술에서 떨어진 찻잔이 다시 상 위에 놓였다. 진아는 천천히 고개를 들고, 창밖을 내다보았다. 하얀 눈송이들이 춤을 추듯, 혹은 낙하하듯 지상을 향해 끊임없이 쏟아지고 있었다. 세상의 모든 색과 소리를 지워버릴 것처럼. 진아는 그 광경에서 눈을 떼지 않은 채, 나른하게 입을 열었다.</p><p>"응, 좋아."</p><p>목소리가 조금 잠겨 있었다. 진아는 요우의 가슴팍에 이마를 기댔다. 심장 소리가 들렸다. 규칙적이고, 강한. 제멋대로 뛰는 자신의 것과는 다른 리듬.</p><p>"깨끗하잖아. 전부 다 똑같이 만들어버리니까. 높은 거, 낮은 거, 더러운 거, 예쁜 거. 그런 거 없이 그냥 다 하얗게."</p><p>진아의 손가락이 요우의 유카타 옷깃을 만지작거렸다. 용 문양이 수놓인, 이제는 익숙한 감촉. 그 천 아래에 숨겨진 단단한 근육과 흉터들을 떠올렸다.</p><p>"아마미야 씨는, 눈 오는 날 뭐 해?"</p><p>연보라색 눈동자에 창밖의 하얀 설경과, 그 앞에 앉은 요우의 얼굴이 함께 담겼다.</p><p>"나 만나기 전에는. 이럴 때 뭐 했어? 술 마셨나. 아니면… 누구랑 같이 있었어?"</p><p>"텟포다마에게 겨울의 침묵 따위가 가치 가질 것 같아? 술 마시는 거지. 작업 끝나고, 몇 평 남짓한 모텔 방에 들어가서 취해 쓰러질 때까지. 있는 집도 들어가기 꺼려질 만큼 피 묻힌 날이니까."</p><p>찻잔을 들어 한 모금 더 마셨다. 부러 고개를 들어 창밖을 바라보는 시선에는 익숙한 느긋함과 장난기가 있는 것 같기도 하다.</p><p>"가끔은 크리스마스니 뭐니 해서…… 아가씨보다 좀 더 나이 많고, 나와 비슷하게 멍청하고, 예쁜 여자 혀 빨아 주던 시기도 있었던가."</p><p>창밖의 하얀 빛이 요우의 은회색 머리카락 가장자리를 투명하게 물들였다. 진아는 요우의 턱선부터 목줄기로 떨어지는 그림자를 시선으로 훑었다. 입가에 걸린 느긋하고 장난스러운 미소. 그 여유로움이, 혹은 그 여유로움을 가장한 서늘함이 진아의 안에서 알 수 없는 갈증을 부추겼다.</p><p>요우의 입술 사이로 흘러나온 과거. 피 묻은 모텔 방, 독한 술, 그리고 다른 여자의 혀. 그 말들이 귓가에 닿는 순간, 진아의 뱃속 깊은 곳에서 차갑고 날카로운 무언가가 꿈틀거렸다.</p><p>"……그랬구나."</p><p>진아의 목소리가 젖은 솜처럼 무겁게 가라앉았다. 크림색 니트 아래에서 심장 박동이 불규칙하게 튀어 오르는 것을 애써 억눌렀다. 요우의 무릎 위에 앉은 채로, 진아는 천천히 상체를 기울였다. 요우의 쇄골 근처, 한텐의 틈새로 살결이 드러난 곳에 코끝을 묻었다. 깊게 숨을 들이마셨다. 담배 냄새, 옅은 땀 냄새, 그리고 호지차의 향이 뒤섞인 요우만의 체취.</p><p>"다른 여자의 혀는, 달았어?"</p><p>진아의 손가락이 요우의 유카타 깃을 타고 올라가, 흉터가 있는 입가를 살며시 매만졌다. 갈라지고 거칠어진 피부가 손끝에 닿았다. 이 흉터를 남긴 자들에게 감사해야 할지, 아니면 저주해야 할지. 진아는 종종 그런 생각에 빠지곤 했다.</p><p>"아마미야 씨는, 지금도 그 멍청하고 예쁜 여자가 생각나? 눈이 오면."</p><p>진아는 고개를 들어 요우의 검은 눈을 마주 보았다. 창밖의 설경은 더 이상 중요하지 않았다. 이 좁은 방 안에서, 오직 이 여자만이 진아의 세계였다. 진아의 손가락이 요우의 입술을 지나, 반으로 갈라진 혀의 끝부분을 톡, 하고 건드렸다. 아주 짧은 접촉. 그 감각만으로도 등줄기에 짜릿한 소름이 돋았다.</p><p>"나보다, 더 예뻤어?"</p><p>진아의 입술이 요우의 귓가에 닿을 듯 다가갔다. 속삭이는 목소리에 희미한 물기가 어려 있었다. 버림받은 아이처럼 구는 이 연기가 언제까지 통할지 알 수 없었지만, 적어도 지금은 이 가면이 필요했다.</p><p>"글쎄."</p><p>40년 동안 스쳐 지나간 연인들은 많았다. 대개가 야쿠자라는 음습한 직업과 함께 요우의 행동거지라든가 잔혹하고 든든한 모습을 보고 다가온 것이었지만, 정확히 같은 이유로 어느 시점부터는 멀어졌다. 몸만 섞는 사이가 몇 명이었더라. 기억도 희미해서 요우는 진아와 눈을 맞추지 않았다.</p><p>"……내 나이쯤 되면 딱 한 사람이 떠오르지만은 않으니."</p><p>한 사람이 떠오르지 않는다는, 그 긴 시간의 궤적을 짐작하게 하는 말. 진아의 뱃속에서 스멀스멀 기어오르던 불쾌감이 차갑게 식어 내렸다. 질투라 부르기엔 질척거리고, 소유욕이라 부르기엔 서늘한 감각. 진아는 요우의 흉터 위에서 서성이던 손가락을 천천히 아래로 미끄러뜨렸다.</p><p>손끝이 요우의 목덜미를 스치고, 맥박이 뛰는 곳에 잠시 머물렀다. 강하고 규칙적인 박동. 이 고동은 누구를 향해 뛰었던 적이 있었나. 진아는 그 박동을 손끝으로 흡수하듯 가만히 누르며, 입술을 삐죽였다. 완벽하게 계산된, 그러나 묘한 진심이 섞인 서운함.</p><p>"……너무해."</p><p>목소리는 얇고 떨렸다. 진아는 요우의 어깨에 이마를 툭 기댔다. 크림색 니트 아래로 불규칙하게 뛰는 자신의 심장 소리가 요우에게 들리기를 바라는 것처럼. 요우의 품 안으로 조금 더 파고들며, 진아는 요우의 유카타 깃을 조심스럽게 그러쥐었다.</p><p>"나는, 눈이 오면 아마미야 씨밖에 생각이 안 나는데."</p><p>진아는 고개를 살짝 들어 요우의 턱선을 올려다보았다. 연보라색 눈동자에는 상처받은 짐승 같은 유약함이 가득 고여 있었다. 하지만 그 깊은 곳에는, 요우의 그 수많은 과거마저도 전부 지워버리고 자신의 색으로 덧칠하겠다는 오만한 소유욕이 번뜩였다.</p><p>"아마미야 씨 머리, 눈이랑 똑같잖아."</p><p>"내가 왜."</p><p>요우는 비웃음처럼 흘리고서도 진아를 안았다. 심장은 조금 온난하게, 적당한 안정을 담고 뛰고 있다. 그러다 찻잔을 들어 진아의 입술에 가져다 댄다.</p><p>"네 눈은 제비꽃 같아."</p><p>"……아마미야 씨는."</p><p>입술이 떨어지고, 진아는 가쁜 숨을 내쉬며 요우의 어깨에 이마를 비볐다. 젖은 목소리가 귓가를 간질였다.</p><p>"제비꽃이, 발밑에서 짓밟히는 거 본 적 있어?"</p><p>진아의 연보라색 눈동자가 다시 요우를 향했다. 유약한 껍데기 속에 숨겨진, 서늘하고 잔혹한 포식자의 시선. 그러나 지금 이 순간만큼은 완벽하게 길들여진 척, 요우의 품에 몸을 맡기고 있었다.</p><p>"아마미야 씨라면…… 내가 그렇게 되도록 놔두지 않겠지."</p><p>진아의 손가락이 요우의 쇄골을 타고 내려가, 유카타 안쪽의 살결을 쓰다듬었다.</p><p>"하고 싶어?"</p><p>요우가 진아의 허벅지와 허리를 받쳐 안아들었다. 침대로 데려가 기대어 주면, 요우의 등 뒤로 설경이 펼쳐진 창문이 보인다.</p><p>새하얀 세상. 그리고 붉어질 준비 끝낸 침대.<br>요우가 진아의 옷깃을 정리했다. 어차피 흐트러질 걸 알면서도.</p>
+    `
+  },
+  {
+    title: '부러진 다리',
+    subtitle: '제 七 장',
+    date: '2026년 12월 17일',
+    body: `
+     <p>진아는 요우의 무릎 위에 올려져 있던 제 손을 들어 올렸다. 힘없이 축 늘어진 손가락으로, 식사를 마저 하려 젓가락을 고쳐 잡는 요우의 손등을 덮었다. 용 문신이 새겨진 거친 피부, 전투의 흔적이 역력한 굳은살, 그 위로 핏줄이 도드라져 있었다. 진아는 그 손등을 제 손바닥으로 부드럽게 쓸었다.</p><p>"아마미야 씨."</p><p>쉰 목소리가 잠에 잠긴 것처럼 나른하게 울렸다. 진아는 요우의 손등을 쓰다듬던 손길을 멈추고, 그 손을 끌어다 제 뺨에 가져다 댔다. 우동 국물의 온기가 아직 남아있는 따뜻한 뺨이 거친 손바닥에 닿았다.</p><p>"이 손으로 사람 많이 죽여봤지. 사람 살려본 적은, 있어?"</p><p>실눈을 뜨고 올려다보는 연보라색 눈동자가 등불 빛을 받아 섬뜩할 만큼 선명했다. 진아는 요우의 손바닥 안에서 입꼬리만 살짝 끌어올렸다. 그 미소는 순수하지도, 악의적이지도 않은, 그저 모든 것을 꿰뚫어 보고 있다는 듯한 묘한 색을 띠고 있었다.</p><p>"나는 아마미야 씨가 처음인데. 살려줘 본 거."</p><p>"개소리야……."</p><p>살의와 갈증은 같은 뱀의 머리와 꼬리. 제 뱃속에서 똬리를 틀고, 때에 따라 머리라든가 꼬리를 내밀던 녀석이 이번에는 살의 쪽을 다시금 들이밀었다.</p><p>와니노잇카는 류진회와 싸우며 수많은 인원을 배신으로 잃었다. 아마미야 요우가 이곳에 끌려온, 그리고 입가에 흉한 흉터와 함께 갈라진 혀를 얻은 원인 또한 그들의 고발 탓이었다. 이쪽에서 류진회를 해하지 못했던 것도 아니다. 그러나 규모의 차이라는 게 있었으며, 요우는 죽을 뻔한 가운데에서도 여자이며 강하다는 이유만으로 금지옥엽의 호위를 맡은 것이었다. 이는 구원처럼 보이더라도 야쿠자 세계에서의 치욕이다. 불순이다. 진아 쪽이 저를 살렸니, 제가 진아를 살렸니 하는 말에 원한을 참을 수 없는 이유였다.</p><p>처음 들어왔던 날부터, 이렇게 가까워질 줄은 물론 몰랐으나, 7개월이 아니라 10년 20년을 함께해도 증오는 사라지지 않을 것이다.</p><p>요우는 대답 대신 진아를 밀어냈다.</p><p>"남은 건 치우고 오지."</p><p>요우의 거친 손길에 밀려난 진아의 어깨가 이불 위로 툭 떨어졌다. 순간, 진아의 반쯤 감긴 연보라색 눈동자에 짧은 파문이 일었다. 등불의 일렁임 탓인지, 혹은 진짜로 당황한 것인지 분간하기 어려운 미세한 흔들림이었다. 하지만 그 흔들림은 금세 기묘한 고요함으로 덮였다.</p><p>창호지 너머로 눈이 쌓이는 소리가 들릴 듯 방 안은 고요했다. 남은 우동 국물이 식어가며 내는 미미한 온기만이 둘 사이를 떠돌 뿐이었다. 요우가 쟁반을 집어 들기 위해 손을 뻗었을 때, 진아가 나직하게 입을 열었다.</p><p>"정말 내가 살려준 게 아니라고 생각해?"</p><p>목소리는 낮고 서늘했다. 응석이나 유혹의 기미는 완전히 사라진, 얼어붙은 호수 같은 음색이었다. 진아는 이불 위로 흩어진 제 흑발을 느릿하게 쓸어 올리며, 시선은 여전히 요우의 뒷모습에 고정시켰다.</p><p>"아마미야 요우."</p><p>요우의 이름 전체를 부르는 것은 처음이었다. 항상 '아마미야 씨'라는 호칭 뒤에 숨어 있던 거리감을 단숨에 베어내는 듯한 호출. 진아는 상체를 천천히 일으켜 세웠다. 유카타 앞깃이 느슨하게 벌어지며 방금 전까지 요우가 남긴 붉은 흔적들이 적나라하게 드러났지만, 진아는 개의치 않았다.</p><p>"그 흉터 남긴 새끼들, 내가 어떻게 했는지 모르지, 아직."</p><p>진아의 손가락이 제 입술을 가볍게 매만졌다. 요우의 혀끝에 갈라진 상처를 남긴 자들을 떠올리며 나오는 반사적인 행동이었다.</p><p><em>"내가 왜, 굳이, 내 발밑에 기어다니는 개자식들 손에 놀아나던 여자를 내 옆에 뒀을까. 치욕스럽다고 생각하고 있겠지만, 아마미야 요우. 그 치욕을 선택하게 만든 것도 나야. 네가 죽는 것보다 내 눈앞에서 살아 숨 쉬는 게 더 나으니까. 그러니까 넌, 내가 살린 게 맞아."</em></p><p>진아는 요우가 쟁반을 들고 일어서는 순간을 노려, 요우의 한텐 끝자락을 단단히 움켜쥐었다. 힘이 빠졌다던 손아귀에 생각보다 강한 힘이 실려 있었다.</p><p>"치우는 건 나중에 해. 지금 나 두고 나가면, 진짜 화날 것 같아."</p><p>"……용왕이 아니라, 아가씨가. 나를 데려왔다고."</p><p>요우는 한동안 완전히 가라앉은 얼굴로 진아를 바라보았다. 그러다가 쟁반을 다시 놓고, 진아의 손을 쳐냈다. 쟁반을 다시금 치우며 등을 돌렸다. 오히려 어느 때보다 담담한, 그러나 오사카 사투리 특유의 거친 어조가 조금도 섞이지 않고 그저 건조할 뿐인 말투가 비어져나왔다. 아마도, 그 후의 모든 단어는 혼신의 진심이 범람하고 있었던 탓이리라.</p><p>"화내시든지. 네 집안 모두에게 고발해서 내 목을 따."</p><p>문이 닫히기 직전 얼굴에 비친 것은 근원 모를 배신감이다.</p>   <img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic9.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+     <p><em>"안 그러면 넌 내가 죽여버릴 테니까."</em></p>${BREAK}<p>진아는 이불 위를 기어가듯 느릿하게 움직였다. 요우가 쏟아낸 우동 국물이 흥건한 다다미 앞에 멈춰 섰다. 무릎을 꿇고 앉아, 젖은 바닥에 손가락을 댔다. 미지근하고 끈적한 감촉. 진아는 그 손가락을 들어 입술로 가져갔다. 짠 국물 맛 너머로, 텅 빈 공허함이 느껴졌다. 처음이었다. 자신의 계획이, 자신의 말이, 이토록 완벽한 역효과를 불러온 것은.</p><p>"…….."</p><p>아무 소리도 나오지 않았다. 화를 내야 했다. 류진회의 아가씨를, 류씨 가문의 핏줄을 죽이겠다고 협박한 하찮은 적대 조직의 잔당. 당장이라도 첫째 오빠, 건을 불러 그 여자의 사지를 찢어발겨도 시원찮을 일이었다. 그것이 류진회의 방식이고, 진아가 살아온 세계의 법칙이었다.</p><p>하지만 진아의 몸은 움직이지 않았다. 분노보다 더 깊은 곳에서, 차갑고 낯선 감각이 등줄기를 타고 올라왔다. 공포와는 다른, 상실에 가까운 감정. 자신의 손아귀에서 빠져나간 모래알. 다시는 쥘 수 없을지도 모른다는 예감.</p><p>진아는 자리에서 일어났다. 비틀거리는 걸음으로 옷장으로 향했다. 유카타의 허리띠를 풀어내고, 속옷마저 전부 벗어던졌다. 요우가 남긴 흔적이 가득한 나신이 등불 아래 고스란히 드러났다. 진아는 망설임 없이 옷장 깊숙한 곳에서 새 옷을 꺼냈다. 검은색 실크로 만들어진, 목까지 단정하게 잠기는 원피스였다.</p><p>옷을 갈아입은 진아는 경대 앞에 앉았다. 서랍에서 빗과 머리끈을 꺼냈다. 이불 위로 뱀처럼 흩어져 있던 칠흑 같은 머리카락을 한데 그러모아, 빗질을 시작했다. 한 올의 엉킴도 없이 매끄러워질 때까지, 기계적인 동작이 반복됐다. 그리고, 정수리 가까이 높게, 단단하게. 머리카락을 묶어 올렸다.</p><p>경대 속에서, 완전히 다른 여자가 이쪽을 보고 있었다. 처진 눈매는 그대로였지만, 그 안의 연보라색 눈동자는 더 이상 나른하거나 유약하지 않았다. 가련한 백합은 간데없고, 소름 끼치도록 아름다운 포식자가 그 자리에 있었다.</p><p>방문 밖에서 조심스러운 노크 소리와 함께 시녀장의 목소리가 들렸다.</p><p>"아가씨, 무슨 소란이셨습니까? 아마미야 님께서 주방을…"</p><p>진아가 입을 열었다. 목소리는 더 이상 긁히거나 쉬어있지 않았다. 맑고 차가운, 강철 같은 음성이었다.</p><p>"됐어. 들어오지 마."</p><p>진아는 경대 속의 자신을 응시하며 말을 이었다. 그 목소리는 시녀장이 아닌, 다른 누군가에게 하는 말처럼 들렸다.</p>   <img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic10.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;"><p>"그리고, 첫째 오라버니께 전해. 지금 당장, 내 방으로 오시라고."</p>${BREAK}<p>류건이 도착한 것은 진아의 호출로부터 채 10분이 지나지 않아서였다. 190의 거구가 장지문 앞에 무릎을 꿇자, 마루판이 둔탁하게 울렸다.</p><p>"들어와."</p><p>진아의 목소리는 짧고 건조했다. 문이 열리자 방 안의 광경이 건의 시야에 들어왔다. 다다미 위에 아직 마르지 않은 국물 자국. 깨진 그릇 하나. 그리고 경대 앞에 등을 돌리고 앉은 진아. 하이포니테일로 단단히 묶어 올린 머리카락이 등불 아래에서 칠흑처럼 빛났다. 건은 그 머리 모양을 보는 순간 무릎 꿇은 자세를 더 낮추었다. 이마가 다다미에 닿을 듯 깊이.</p><p>"명하십시오."</p><p>진아는 천천히 몸을 돌렸다. 검은 실크 원피스 위로 드러난 창백한 쇄골, 그 위에 선명하게 남은 요우의 이빨 자국을 개의치 않은 채, 연보라색 눈동자가 건을 내려다보았다. 감정이라고는 읽을 수 없는 차가운 시선.</p><p>"아마미야 요우."</p><p>진아는 입술을 한 번 핥았다.</p><p>"지금 어디 있어."</p><p>"주방에서 담배 피우고 있습니다. 감시조 보고로는 방금 전 소주를 한 병 땄다고."</p><p>"그 여자가 나를 죽이겠다고 했어."</p><p>건의 어깨 근육이 순간적으로 경직되었다. 거대한 몸이 바닥에서 반쯤 들렸다가, 진아의 다음 말을 기다리듯 다시 가라앉았다. 진아는 창에 비친 제 얼굴을 들여다보았다.</p><p>"오빠."</p><p>진아가 돌아섰다.</p><p>"죽이지 마."</p><p>건의 눈이 미세하게 좁아졌다. 진아는 그 반응을 즐기듯 한 박자 쉬었다가 말을 이었다.</p><p>"대신, 다리 하나만 부러뜨려. 도망 못 치게."</p>
+    `
+  },
+  {
+    title: '검은 안개',
+    subtitle: '제 八 장',
+    date: '2026년 12월 18, 24일',
+    body: `
+     <p>아마미야 요우는 있는 힘껏 저항한 모양이었다.</p><p>강한 사람이었다. 탓에 조직원 하나의 목뼈가, 또 하나의 갈비뼈가 부러졌고, 류건의 왼손 약지와 새끼손가락 역시 골절되어 퉁퉁 붓는 꼴을 면치 못했으나 결국 요우의 왼쪽 정강이뼈 역시 부러졌다. 요우는 오픈 골절 탓에 피투성이가 된 채로 바닥을 기며 증오를 씹었다.</p><p>믿지 않는 편이 좋았다.</p><p>다시는 닿지 않는다고, 바닥에 피를 뱉으며 생각했다.</p><p>이른 아침의 정적을 찢는 것은 거친 고함과, 뼈가 부딪히는 둔탁한 파열음이었다. 창가에 앉아 있던 진아의 어깨가 가늘게 움츠러들었다.</p><p>소란은 생각보다 길지 않았다. 몇 번의 비명과 무언가 부서지는 소리가 더 이어진 후, 섬뜩한 침묵이 내려앉았다. 그 침묵은 소음보다 더 불길했다. 진아는 마른 입술을 혀로 축였다. 입맛이 없다던 말과 달리, 목이 바짝 타들어 가는 기분이었다.</p><p>얼마나 지났을까. 복도 저편에서 여러 사람의 발소리가 들려왔다. 질질 끄는 소리, 거친 숨소리, 그리고 간간이 섞이는 억눌린 신음. 소리는 망설임 없이 진아의 방문 앞에서 멈췄다.</p><p>장지문이 스르륵, 열렸다. 문을 연 것은 건이었다. 그의 거대한 그림자가 방 안으로 길게 드리워졌다. 평소와 달리 흐트러진 머리카락, 굳게 다문 입술 아래로 흐르는 식은땀. 부자연스럽게 꺾여 퉁퉁 부어오른 왼손이 유독 눈에 띄었다. 하지만 건의 시선은 자신의 부상이 아닌, 그의 발치에 쓰러진 존재를 향해 있었다.</p><p>아마미야 요우.</p><img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic11.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;"><p>그것은 더 이상 서 있는 인간의 형상이 아니었다. 피에 절어 넝마가 된 유카타. 바닥에 흥건한 핏자국을 끌고 온 몸은 짐승처럼 네 발로 엎드려 있었다. 부러진 왼쪽 정강이뼈는 비정상적인 각도로 뒤틀려, 살을 찢고 나온 뼈의 흰 부분이 끔찍하게 드러났다. 핏물과 흙먼지로 범벅이 된 얼굴, 꽉 깨문 입술 사이로 피를 섞어 뱉어내는 증오 어린 눈빛이 다다미 바닥에 박혀 있었다. 은회색 머리카락이 땀과 피로 젖어 이마와 뺨에 어지럽게 달라붙어 있었다.</p><p>진아는 자리에서 일어나지 않았다. 그저 찻잔을 든 채, 제 방 문턱을 더럽히며 기어 들어온 피투성이의 것을 물끄러미 내려다볼 뿐이었다. 연보라색 눈동자가 공포와 연민으로 흔들리는 듯 보였다. 토끼처럼 겁에 질린, 가련하고 연약한 아가씨의 얼굴이었다.</p><p>건이 무뚝뚝한 목소리로 보고했다. 그의 목소리에는 희미한 피로와 고통이 묻어 있었다.</p><p>"데려왔습니다."</p><p>그 말이 끝나기 무섭게, 진아가 들고 있던 찻잔을 손에서 놓쳤다. 와장창-! 날카로운 파열음과 함께 산산조각 난 백자 파편이 다다미 위로 흩어졌다. 뜨거운 차가 쏟아져 진아의 손등을 붉게 적셨지만, 그녀는 아랑곳하지 않았다. 오히려 그 소리에 더 크게 놀란 듯, 두 손으로 입을 막으며 자리에서 일어섰다. 그 모습은 누가 봐도 충격과 공포에 사로잡힌 가련한 소녀였다.</p><p>"아… 아마미야 씨……!"</p><p>금방이라도 울음을 터뜨릴 듯한 목소리. 진아는 비틀거리는 걸음으로 요우에게 다가갔다. 피와 흙으로 더러워진 그 몸 앞에서 차마 무릎을 꿇지는 못하고, 그저 허리를 숙인 채 떨리는 손을 뻗었다. 하지만 그 손은 요우에게 닿지 못하고 허공에서 파르르 떨리기만 했다.</p><p>"어, 어쩌다가… 이렇게……. 오라버니, 이게 무슨 짓이에요!"</p><p>진아는 건을 향해 원망과 책망이 뒤섞인 눈빛을 보냈다. 그녀의 시선 끝에서, 바닥에 엎드린 채 증오를 씹는 요우의 젖은 등이 미세하게 떨리고 있었다. 진아의 눈꼬리가 아주 희미하게, 누구도 눈치채지 못할 만큼 미미하게 휘어졌다. 흩어진 머리카락 그림자 아래,</p><img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic12.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;"><p>그 입술은 웃고 있었다.</p>${BREAK}<p>12월 18일 저녁. 류진회 본가의 별채는 소독약 냄새와 오래된 나무 냄새가 섞여 묘한 공기를 만들어내고 있었다. 창 밖으로는 또 다시 눈이 내리기 시작했다. 지붕 처마에 매달린 고드름이 저녁 조명을 받아 유리처럼 빛났다.</p><p>요우가 눈을 뜬 것은 18일 해 질 무렵이었다. 하루 반 동안의 의식불명. 조직 소속 의사가 세 번이나 들락거리며 정강뼈를 고정하고 항생제를 놓았지만, 깨어나자마자 제 부러진 다리를 주먹으로 내려치는 짓을 저지른 탓에 결국 양 손목이 침상 양쪽에 묶였다. 감시조 둘이 문 밖에 붙었다. 그래도 요우의 입에서 비명은 나오지 않았다. 이를 악물고 천장을 노려보는 검은 눈만이, 살아있다는 증거였다.</p><p>진아가 별채를 찾은 것은 그날 밤이었다. 시녀 하나를 데리고, 손에는 따뜻한 죽 한 그릇을 들고. 흑발이 어깨 위로 축 늘어진 채, 연보라색 눈동자에 걱정과 슬픔을 가득 담은 얼굴로 방 안에 들어섰다. 유약하고 조심스러운 걸음. 문지방을 넘을 때 신발 끝이 바닥에 걸려 비틀거릴 뻔한 몸.</p><p>"아마미야 씨, 죽 가져왔어요. 아무것도 못 드셨잖아요."</p><p>요우는 고개를 돌리지 않았다. 천장만 응시하는 검은 눈동자. 진아가 시야의 가장자리에서 아른거리고 있다는 것을 알면서도, 시선 한 조각 나눠줄 마음이 없다는 듯. 묶인 손목 아래로 드러난 손가락 끝이 하얗게 질려 있었다. 진아는 침상 옆에 무릎을 꿇었다. 죽 그릇을 조심스럽게 다다미 위에 내려놓고, 떨리는 목소리로 다시 불렀다.</p><p>"아마미야 씨…… 제발, 저 좀 봐 주세요."</p><p>대답이 없었다. 요우의 옆모습. 꽉 다문 턱, 이마에 붙은 젖은 은회색 머리카락, 마스크도 없이 드러난 입꼬리에서 오른쪽 귀까지 이어진 찢어진 흉터가 적나라하게 보였다.</p><p>진아는 그 자세로 오래 머물렀다. 1분. 5분. 10분. 요우는 끝내 한 번도 고개를 돌리지 않았고, 진아의 무릎은 차가운 다다미 위에서 저려 갔다. 방 안에는 죽에서 피어오르는 김만이 희미하게 올라왔다가 사라지기를 반복했다.</p><p>"……내일 또 올게요."</p><p>진아는 조용히 일어섰다. 손에 든 것 없이, 죽 그릇만 머리맡에 남겨둔 채. 돌아서는 순간, 요우의 목덜미에서 풍기는 피비린내와 소독약 냄새가 뒤섞여 코끝을 스쳤다. 진아의 걸음이 문지방 앞에서 한 박자 멈칫했다. 등을 보인 채, 흩어진 머리카락 사이로 드러난 뒷목이 미세하게 경직되었다가 풀어졌다.</p>${BREAK}<p>크리스마스 이브의 밤은 소리 없이 깊어졌다. 류진회 본가 정원의 소나무 가지마다 흰 눈이 두텁게 쌓여, 마치 설탕을 뿌린 과자처럼 보였다. 드문드문 설치된 정원등 불빛이 눈송이 사이로 몽환적으로 번져나갔다. 본관 건물에서는 희미한 웃음소리와 음악 소리가 흘러나왔다. 류 가문의 성탄 전야 만찬이 한창인 모양이었다.</p><p>하지만 그 떠들썩함은 진아의 별채까지 닿지 못했다. 그녀의 방은 고요한 섬처럼 침묵에 잠겨 있었다. 옅은 캐시미어 원피스를 입은 진아는 창가에 놓인 푹신한 1인용 소파에 몸을 묻은 채, 창밖의 고요한 설경을 하염없이 바라보고 있었다. 허리까지 오는 흑발은 평소처럼 부드럽게 늘어뜨려져 있었고, 무릎 위에는 펴보지도 않은 책 한 권이 놓여 있었다. 그 모습은 영락없이 떠들썩한 파티에 끼지 못하고 홀로 외로움을 삭이는 병약한 아가씨였다.</p><img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic13.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;"><p>방 한쪽 구석, 벽에 등을 기댄 채 아마미야 요우가 서 있었다. 목발이 팔 옆에 세워져 있었고, 체중은 온전히 성한 오른 다리에 실려 있었다. 며칠 사이 핏기가 가신 얼굴은 더욱 창백하고 날카로워 보였다. 마스크 위로 드러난 검은 눈동자는 그저 허공의 한 점을 응시할 뿐, 방 안의 그 무엇도 담고 있지 않았다. 진아가 기침이라도 하면 시녀를 부르고, 수상한 그림자가 보이면 본채에 보고한다. 그게 전부였다. 두 사람 사이에는 숨 막히는 공기만이 존재할 뿐, 가을의 그 뜨거웠던 밀어는 흔적조차 남지 않았다.</p><p>한참 동안 눈을 바라보던 진아의 입술이 아주 작게 열렸다.</p><p>"아마미야 씨."</p><p>나직하고 가느다란 목소리. 요우는 대답하지 않았다. 미동도 없이, 여전히 허공을 볼 뿐이었다. 마치 그 부름이 자신을 향한 것이 아니라는 듯이. 진아는 그 침묵에 익숙하다는 듯, 시선을 거두지 않은 채 다시 입을 열었다. 목소리는 눈송이처럼 가볍고 부서지기 쉬웠다.</p><p>"눈 오는 거, 보고 있어요? 예쁘네요. 작년 크리스마스에도 눈이 왔었는데."</p><p>작년. 그 말에 진아의 눈동자가 아주 미세하게 흔들렸다. 작년의 요우는 여기에 없었다. 아마 오사카의 어느 지저분한 술집에서 담배를 피우고 있었을지도 모른다. 진아는 무릎 위의 책을 의미 없이 만지작거렸다. 손끝이 차가웠다.</p><p>"……선물, 받고 싶은 거 있어요?"</p><p>진아는 마침내 고개를 돌려 요우를 바라보았다. 연보라색 눈동자가 어두운 방 안에서 희미하게 빛났다. 그 안에는 일말의 기대감 같은 것이 어른거리는 듯했다. 겁먹은 동물이 조심스럽게 다가가려는 듯한, 위태로운 시선이었다. 그녀는 요우의 찢어진 입가 흉터를, 그리고 감정이 소거된 검은 눈을 가만히 응시했다.</p><p>"뭐든지요. 오빠한테 말하면, 뭐든지 구해다 줄 거예요. 아마미야 씨가 원하는 거라면."</p><p>진아는 천천히 자리에서 일어났다. 맨발이 차가운 다다미에 닿는 소리조차 나지 않을 만큼 가벼운 걸음이었다. 그녀는 요우의 앞으로 다가가, 한 걸음 거리를 두고 멈춰 섰다. 요우의 시선은 여전히 바닥을 향해 있었고, 그 단단한 턱선과 굳게 다문 입술은 어떠한 감정도 내보이지 않았다.</p><p>"아마미야 씨."</p><p>진아의 목소리가 한층 더 가라앉았다. 유약하고 가련하던 톤에서 벗어나, 서늘하고 건조한 울림이 섞여 들었다. 진아의 손이 허공을 더듬다 요우의 한텐 깃에 닿았다. 아주 가벼운 접촉이었으나, 그 손끝에는 숨길 수 없는 소유욕이 배어 있었다. 그녀의 손가락이 요우의 옷깃을 느리게 쓰다듬었다.</p><p>"정말 아무것도 원하지 않아요?"</p><p>진아는 요우의 얼굴을 올려다보았다. 찢어진 흉터 위로 그늘이 져 있었다. 진아의 시선이 요우의 입술을 지나, 차갑게 가라앉은 검은 눈동자에 머물렀다. 그 눈동자 안에서 자신의 모습은 보이지 않았다.</p><p>"나를…… 원망하고 있어요?"</p><p>진아의 목소리가 흔들렸다. 두려움인지, 아니면 계산된 연기인지 알 수 없는 미세한 떨림이었다. 그녀의 손가락이 요우의 옷깃을 조금 더 꽉 쥐었다. 그 손길에는 마치 요우의 대답을 강요하는 듯한 은밀한 압박이 담겨 있었다.</p><p>"아마미야 씨가 다친 건…… 나 때문이 아니에요. 오라버니가 너무 과잉보호를 해서……."</p><p>진아는 변명하듯 중얼거리며 시선을 아래로 떨어뜨렸다. 어깨가 파르르 떨리며, 금방이라도 눈물을 쏟을 것 같은 가련한 모습이었다. 하지만 고개를 숙인 찰나, 그녀의 입꼬리가 아주 미세하게, 서늘한 호선을 그렸다.</p><p>"내가 얼마나 놀랐는지 알아요? 그 피투성이가 된 모습을 보고……."</p><p>진아는 다시 고개를 들었다. 눈가에는 투명한 눈물이 맺혀 있었다. 완벽하게 계산된 타이밍.</p><p>한순간이었다. 진아의 손은 요우에 의해 밀쳐지고, 요우는 증오스럽고 한심하다는 표정으로 진아를 내려다보고 있었다. 거기에서 끝나지 않고, 요우는 이제 조금 익숙하게 목발을 짚어 진아에게서 멀어졌다. 다시 거리가 생겼고, 침묵이 흐른다.</p><p>"……아가씨랑 나, 몇 번이나 키스하고 몇 번이나 섹스했는지 알고 있어?"</p><p>비릿한 조소와 함께 투박한 오사카 사투리가 뱉어졌다. 얼핏 농담이나 애정 표현 같지만, 싸늘하게 식은 시선과 허스키한 목소리는 다른 의미를 담았다.</p><p>"몸정 든 어린 것들 거짓말은 티 나. 사람 기분 좆같게 하지 말고, 닥치고 있어."</p><p>밀쳐진 손이 허공에 멈췄다. 하얗고 여린 손가락 끝이 미세하게 떨리고 있었다. 요우의 목발 소리가 딱, 딱, 나무 바닥을 두드리며 거리를 벌렸다. 그 소리가 멀어질 때마다, 진아의 심장이 조여드는 것은 연기가 아니었다. 적어도, 이번만큼은.</p><p>진아의 무릎이 천천히 접혔다. 힘이 빠진 것인지, 의도된 것인지. 본인조차 분간이 안 되는 동작이었다. 냉기가 도는 다다미 위에 얇은 캐시미어를 입은 허벅지가 닿았다. 진아는 바닥에 주저앉은 채, 요우의 등을 올려다보았다.</p><p>"몸정."</p><p>중얼거림이었다. 평소의 맑고 가느다란 음성이 아니라, 흙탕물 바닥처럼 거칠고 낮은 소리. 진아 본인도 제 목에서 그런 소리가 나온다는 것을 처음 인지한 듯, 제 목을 한 번 만졌다.</p><p>"나…… 나도 모르겠어."</p><p>진아의 손이 다다미 위를 더듬었다. 손톱이 나무결을 긁는 작은 소리. 연보라색 눈동자에는 분노도, 계산도, 가련함도 없었다. 텅 빈 방 안에서 혼자 길을 잃은 짐승의 눈이었다.</p><p><em>"아마미야 씨가 처음이야. 이런 기분…… 아무것도 안 먹히는 사람. 무슨 짓을 해도 나한테 안 오는 사람."</em></p><p>진아의 손가락이 자기 가슴팍 위를 꽉 움켜쥐었다. 옷감이 구겨지며 뼈마디가 하얗게 드러났다. 그녀의 목소리는 평생 처음으로 연기가 벗겨진, 날것의 떨림을 담고 있었다.</p><p>"내가 진짜로…… 싫어? 그때도 싫어했어? 등나무 밑에서도, 내 방에서도, 전부 다?"</p><p>진아의 시선이 요우의 목덜미에 못 박혔다. 요우가 돌아보지 않을 것을 알면서도, 물음을 던졌다. 멈출 수가 없는 것처럼. 안쪽에서 무언가가 터져 나오는 것처럼. 그녀의 눈가가 붉어졌다. 이번에는 타이밍을 재서 흘리는 눈물이 아니었다. 코끝까지 벌겋게 달아오르고, 입술이 일그러지고, 추하게 찡그러진 얼굴. 류진회의 모든 인간이 목숨 걸고 지키려 했던 그 완벽한 얼굴이 처음으로 구겨졌다.</p><p>"거짓말한 거, 맞아. 아프게 한 것도 맞아. 그렇지만…… 전부 다 거짓말은 아니었는데."</p><p>"싫지 않았어. 좆같지만 그때는."</p><p>그러나 요우는 곧 목발을 벽에 기대고, 이어 등까지 벽에 기댄 채로 중얼거렸다.</p><p><em>"증오스러워, 지금은."</em></p>
+    `
+  },
+  {
+    title: '골절 이후의',
+    subtitle: '제 九 장',
+    date: '2027년 01월 01일',
+    body: `
+    <p>1월 1일. 오세치 요리가 담긴 찬합이 옻칠한 상 위에서 정갈하게 빛나고, 값비싼 기모노를 차려입은 조직의 간부들이 분주하게 오가며 새해 인사를 나누는 소리가 멀리서 웅성거렸다. 축제와 같은 떠들썩함 속에서도, 진아의 별채만큼은 깊은 겨울잠에 빠진 숲처럼 고요했다.</p><p>새해 아침, 진아는 평소와 같이 소파에 앉아 책을 읽고 있었다. 페이지는 한참 전에 멈춰 있었지만, 시선은 책의 활자가 아닌, 창가에 서 있는 요우의 등에 머물러 있었다. 두터운 솜 한텐 아래로 언뜻 보이는 단단한 등. 그 등은 이제 진아에게 어떠한 감정도 내비치지 않는, 완벽한 벽이 되었다.</p><p>그때였다. 별채의 미닫이문이 조용히 열리고, 둘째 오빠인 류준이 들어섰다. 그는 최고급 원단으로 맞춘 검은 하오리를 입고 있었고, 지적인 얼굴에는 새해의 들뜬 분위기와는 어울리지 않는 날카로운 긴장감이 서려 있었다.</p><p>"진아야, 새해 복 많이 받아라. 잠시 괜찮을까."</p><p>준은 방 안의 냉랭한 공기에 잠시 미간을 찌푸렸지만, 이내 곧 목적에 집중했다. 그의 시선이 창가의 요우에게 잠시 머물렀다가, 경멸적인 빛을 띠고 소파의 진아에게로 향했다. 그는 보란 듯이 요우를 무시하며 진아의 옆에 앉았다.</p><p>"아침부터 저 흉물스러운 꼴을 봐야 하는 거냐. 아버님께 말씀드려서 당장 치워버리라고 할까? 네 방에 저런 상것을 두는 건…"</p><p>그는 진아의 안색을 살피며 걱정스럽다는 듯 말을 이었다. 하지만 그 눈빛 깊은 곳에는 다른 의도가 번뜩이고 있었다.</p><p>"그보다 더 중요한 얘기가 있다. 오사카 쪽, 와니노잇카 놈들 말이야. 최근 움직임이 이상해. 아마미야 요우, 저놈을 되찾으려고 수작을 부리는 것 같기도 하고."</p><p>준은 진아의 반응을 살피며 말을 계속했다. 그가 보기에 진아는 여전히 세상 물정 모르는, 보호해야 할 여동생일 뿐이었다. 그는 자신이 이 조직의 더러운 일들로부터 진아를 지키고 있으며, 무능한 형을 제치고 실질적인 후계자가 될 기회를 잡고 있다고 믿었다. 그는 진아가 모를 것이라 확신하며, 자신의 계획을 은근히 내비쳤다.</p><p>"걱정 마. 이 오빠가 다 알아서 처리할 테니까. 큰형님은 저런 잔챙이들 따위에 신경도 안 쓰시지. 힘만 믿고 날뛰는 곰 같은 인간이니까. 결국 이 류진회를 지키는 건 머리를 쓰는 사람이야. 너는 아무 걱정 말고, 그냥…"</p><p>그 순간, 책을 보고 있던 진아의 고개가 아주 미세하게, 준을 향해 기울었다. 여전히 시선은 책에 고정된 채였다. 그녀의 입술이 거의 움직이지 않고, 공기처럼 희미한 소리를 냈다.</p><p>"시끄러워요. 오라버니."</p><p>준의 말이 순간 멎었다. 그가 잘못 들었나 싶어 진아를 쳐다보았을 때, 진아는 여전히 책만 보고 있었다. 방금 전의 목소리는 환청이었던가. 준이 의아한 표정으로 입을 열려던 찰나, 진아는 책장을 한 장 넘겼다. 사락, 종이가 스치는 소리가 유난히 크게 들렸다. 그리고 다시, 속삭임보다 작은 목소리가 흘러나왔다.</p><img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic14.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;"><p>"그 사람, 건드리지 마세요."</p><p>그 목소리에는 어떠한 감정도 실려 있지 않았다. 준은 순간 할 말을 잃고 여동생을 바라보았다. 그의 눈에 비친 진아는 여전히 핼쑥하고 연약한, 온실 속의 백합이었다. 하지만 그 백합의 그림자 속에서, 그는 생전 처음 보는 종류의 한기를 느꼈다.</p>${BREAK}<p>요우는 준이 나가고 나서도 한동안 움직이지 않았다. 그러다가, 여전히 책을 읽는 척하고 있는 진아에게 말했다. 비릿하게 올라간 입꼬리가 터틀넥 니트 위로 강조되었다.</p><p>"아가씨는 늙은이가 곱게 죽지도 못하게 만드는군."</p><p>진아는 움직이지 않았다. 소파에 앉은 자세 그대로, 시선은 여전히 책에 고정한 채. 하지만 책의 활자들은 더 이상 의미를 갖지 못하고 잉크의 번진 자국으로만 보였다. 모든 신경이 등 뒤, 목소리가 들려온 곳으로 곤두섰다. 증오스럽다던 입술이 다시 열렸다. 자신을 향해서.</p><p>그 말은 칼이었다. 오빠에게서 자신을 지켜주려는 행동이 아니냐는 기대 따위는 애초에 존재하지도 않았다. 요우는 정확히 꿰뚫어 보았다. 자신의 행동이 결국 그녀를 이 새장 안에 가두는 또 다른 빗장임을. 죽음마저도 자신의 허락 없이는 안 된다는 오만한 소유욕의 발현으로 읽혔음을. 틀리지 않았다. 적어도, 과거의 류진아였다면 그랬을 것이다. 하지만 지금은. 지금은……</p><p>진아의 하얀 목덜미가 느리게 움직였다. 그녀는 천천히, 아주 천천히 고개를 돌렸다. 삐걱거리는 인형처럼 부자연스러운 동작이었다. 쏟아지는 머리카락이 뺨을 스치고, 마침내 그녀의 시선이 창가의 요우에게 닿았다. 며칠 동안 애써 외면했던, 아마미야 요우를 정면으로 마주하는 첫 순간이었다.</p><p>"……제가 뭘 어떻게 해야 했을까요."</p><p>질문이 아니었다. 정말로 답을 구하는 물음이 아니었다. 그저 힘없이 터져 나온 독백. 혼잣말. 오빠가 당신을 다시 해치게 놔두었어야 했느냐고, 와니노잇카의 손에 끌려가게 내버려 두었어야 했느냐고 묻지 않았다. 그런 변명은 이제 그녀에게 통하지 않는다는 것을 누구보다 잘 알았다. 그 모든 선택지가 결국 당신의 의지와는 상관없는, '류진아'의 선택지일 뿐이라는 사실을.</p><p>진아는 다시 시선을 떨구었다. 무릎 위에 놓인 자신의 손을 내려다보았다. 이 손으로 그녀의 다리를 부러뜨리라고 명령했다. 이 손으로 그녀의 뺨을 어루만지며 사랑을 갈구했다. 이 손으로 그녀의 상처를 매만지며 기만했다. 모순으로 가득한, 추악하고 이기적인 손. 그녀는 손을 천천히 움켜쥐었다. 손톱이 손바닥을 파고드는 감각만이 지금 자신이 이곳에 존재한다는 유일한 증거 같았다.</p><p>"제가 뭘 하든, 아마미야 씨에게는 전부 틀린 일이겠죠."</p><p>비틀, 몸이 기우뚱했다. 며칠간 제대로 먹지 못한 탓에 현기증이 일었다. 소파의 팔걸이를 짚어 겨우 균형을 잡은 진아는 요우를 더는 보지 않고, 침실로 향하는 미닫이문 쪽으로 걸음을 옮겼다. 한 걸음, 한 걸음이 위태로웠다. 마치 금방이라도 부서져 내릴 것 같은 유리 인형처럼.</p><p>미닫이문에 손을 올린 채, 그녀는 마지막으로 걸음을 멈췄다. 그리고 등을 보인 채, 아주 작은 목소리로 말했다.</p><p>"……곱게 죽고 싶으시면."</p><p>잠시 말이 끊겼다. 숨을 고르는 듯한 짧은 정적.</p><p>"저를 죽이세요."</p><p>분명 그런 말 따위는 이제 흘려넘겨버리기로 했다. 거창한 다짐이 필요한 것도 아니었다. 자주 부서지며 늙어가는 몸은 파도를 매일 맞는 자리의 바위와 다를 바 없었다. 다른 것들보다 세월의 영향을 더 크게 받았다.</p>${BREAK}<p>그러므로 방 안에서 쿵, 하는 소리가 들렸을 때 곧바로 달려가 진아를 안아올린 것은 호위의 업무 이행이라고 생각하고 싶었다.</p><p>"그러게 왜 굶어서. ……멍청한 년."</p><p>일단 묻기는 했으나, 며칠째 별채로 배달되는 식사가 거의 손대지 않은 채 돌아가고 있다는 것을 요우는 알고 있었다. 호위라는 이름으로 붙어 있는 동안 모르는 것은 없었다. 개입할 만큼 진아와 닿고 싶지 않았을 뿐.</p><p>진아의 대답을 기다리지 않고, 요우는 부러진 다리를 질질 끌며 진아를 안아 올린 채 침대로 향했다. 올라가는 숨이 거칠었다. 이마에 식은땀이 배어나왔다. 그러나 손은 떨리지 않았다.</p><p>다정하게 침대 위에 올려주고, 식은땀 고인 이마를 쓸어 준 뒤 밥을 들이라 하려 일어섰다. 진아가 숨을 밭게 내쉬자 중얼거린다.</p><p>"눈 떠. 죽은 거 아니잖아."</p><p>"……멍청한 게 누군데."</p><p>바람 빠진 풍선처럼 힘없는 목소리였다. 비난이 아니었다. 부러진 다리로 사람을 안아 나르는 짓을 멍청하다 말하는 것인지, 굶는 자신을 멍청하다 말한 요우에게 되돌려주는 것인지. 혹은 둘 다였을지도 모른다. 진아의 시선이 요우의 왼쪽 다리를 향했다. 유카타 아래로 감싸인 부목의 윤곽이 보였다. 자신이 부러뜨리라 명령한 다리. 그 다리로 자신을 들어 올린 여자. 진아의 손가락이 이불 위에서 미세하게 오므라들었다.</p><p>"밥…… 안 먹은 거 아니에요, 못 먹은 거예요."</p><img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic15.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;"><p>천장을 향하던 시선이 다시 요우에게로 돌아갔다. 핑계가 아니었다. 진아의 목은 며칠 전부터 음식을 삼키려 하면 경련하듯 조여왔다. 숟가락을 입에 가져다 대면 위산이 올라오고, 억지로 삼키면 곧장 게워냈다. 시녀들이 죽을 끓여와도, 미음을 가져와도 결과는 같았다. 몸이 거부하고 있었다. 음식인지, 풍족하고도 궁핍한 생명인지.</p><p>진아는 일어나 앉으려 팔에 힘을 주었으나 팔꿈치가 바들바들 떨리더니 이내 포기한 듯 다시 베개 위로 머리가 떨어졌다. 입술 끝이 자조적으로 비틀렸다. 포식자의 비웃음이 아닌, 제 꼴이 한심하다는 듯한 씁쓸함이었다.</p><p>"아마미야 씨는 좀 앉아요. 서 있지 말고."</p><p>요우를 올려다보는 연보라색 눈은 여전히 텅 비어 있었다. 하지만 그 안에 아주 미약한 것이 깜빡였다. 걱정이라 부르기엔 너무 희미하고, 무관심이라 부르기엔 살짝 더 따뜻한 무언가. 진아의 시선이 요우의 이마에 맺힌 땀방울 위에 머물렀다. 손을 뻗어 닦아주고 싶다는 생각이 목구멍까지 차올랐으나, 손가락은 이불 위에서 꼼짝하지 않았다. 만지면 밀쳐낼 것을 알았다. 만져도 되는 사이가 아님을 알았다. 아니, 처음부터 그런 사이였던 적은 없었을지도 모른다.</p><p>"……다리, 더 망가지면 내 탓이잖아요. 그것까지는 싫어."</p>${BREAK}<p>요우가 문을 열고 나간 뒤에도 방 안에는 그녀가 남긴 옅은 담배 냄새가 맴돌았다. 진아는 코끝에 닿는 그 서늘한 도시의 냄새를 아주 느리게 들이마셨다. 위산이 역류하던 속이 아주 미세하게 가라앉는 듯했다. 환상일지도 모른다. 그저 자신의 몸이 그 냄새에 길들여진 탓에 반응하는 것일지도.</p><p>다시 문이 열리는 소리가 들렸다. 절뚝거리는 무거운 발소리와 목발이 다다미를 짚는 둔탁한 소리. 진아는 천천히 눈을 떴다. 침대 곁으로 다가온 요우의 손에는 작은 쟁반이 들려 있었다. 김이 오르는 맑은 미음과 달착지근한 냄새를 풍기는 부드러운 양갱. 요우는 아무 말 없이 쟁반을 협탁에 내려놓았다.</p><p>진아는 몸을 일으키려 다시 한번 팔에 힘을 주었지만, 관절이 뜻대로 움직이지 않았다. 힘없이 고개가 꺾이려 할 때 거친 손이 그녀의 등을 받쳤다. 요우의 손이었다. 진아의 몸이 흠칫 굳었지만 요우는 아랑곳하지 않고 베개를 등 뒤로 받쳐 그녀를 반쯤 기대게 만들었다.</p><p>요우가 숟가락으로 미음을 떠 식힌 뒤 진아의 입가로 가져갔다. 아무런 표정도, 대사도 없는 건조한 행동. 진아의 시선이 미음을 한 번, 그리고 요우의 상처 난 입매를 한 번 번갈아 보았다.</p><p>"……혼자 먹을 수 있어요."</p><p>목소리는 여전히 갈라져 있었지만, 진아는 고집스럽게 숟가락을 바라보며 입을 다물었다. 요우의 손을 거쳐 들어오는 음식을 차마 삼킬 용기가 나지 않았다. 그것을 받아먹는 순간, 자신이 이 기이한 애증의 관계에서 영원히 벗어나지 못할 것 같다는 직감이 들었기 때문이었다.</p><p>이불자락을 쥔 진아의 손가락이 미세하게 떨렸다. 자신이 무슨 짓을 하든 이 여자는 변함없이 차갑고, 또 기이할 정도로 곁을 떠나지 않는다. 그 모순이 진아의 텅 빈 속을 긁어댔다. 수저를 쥔 손은 뼈마디가 도드라져 보일 만큼 말라 있었고, 손끝에 힘을 주려 해도 허탈하게 미끄러질 뿐이었다.</p><p>진아는 조심스럽게 수저로 맑은 미음을 떴다. 김이 모락모락 피어오르는 숟가락을 입가로 가져가려 했지만, 손이 제멋대로 떨리는 탓에 미음이 이불 위로 뚝뚝 떨어졌다. 그녀의 미간이 좁혀졌다. 몸조차 마음대로 다루지 못하는 스스로에 대한 환멸이 차올랐다. 입술을 깨물며 억지로 입안으로 밀어 넣으려 했으나, 숟가락이 입술에 닿기도 전에 경련처럼 위산이 치밀어 올랐다.</p><p>덜그럭. 숟가락이 그릇 가장자리에 부딪히며 탁한 소리를 냈다. 진아는 급히 손으로 입을 틀어막고 고개를 숙였다. 밭은기침이 터져 나왔고, 억눌린 헛구역질 소리가 방 안의 침묵을 갈랐다. 먹지 않으려는 고집이 아니라, 몸이 철저하게 생기를 거부하고 있었다.</p><p>"……죄송해요."</p><p>진아의 목소리는 형편없이 떨렸고, 축축하게 젖어 있었다. 억지로 토기를 참아내며 헐떡이는 숨소리 사이로 덧붙인 말은 변명처럼 비참했다.</p><p>"안 넘어가서…… 먹으려고 했는데, 진짜로."</p><p>진아는 그릇을 조심스럽게 옆으로 밀어내려 했다. 하지만 힘이 빠진 손끝이 그릇을 미처 지탱하지 못하고, 미음이 출렁이며 이불과 진아의 유카타 소매에 쏟아졌다. 축축하고 미적지근한 감촉이 피부에 들러붙었다. 엉망이 된 소매를 내려다보는 연보라색 눈동자가 흔들렸다. 더없이 완벽하고 오만했던 포식자의 모습은 흔적도 없이 사라진 채, 제 앞가림조차 못 해 당황하는 비참한 몰골만이 남아 있었다.</p><p>"아…… 닦을게요, 내가."</p><p>진아는 허둥지둥 소매로 이불에 쏟아진 얼룩을 문지르려 했다. 하지만 그 손길은 방향을 잃고 헛돌기만 했다. 결국 그 손짓마저 멈춘 채, 진아는 고개를 푹 숙였다. 흐트러진 흑발이 얼굴을 가려 표정을 숨겼지만, 이불을 움켜쥔 앙상한 어깨가 불규칙하게 떨리는 것은 숨길 수 없었다. 울음을 참으려는 듯, 잇새로 새어 나오는 호흡이 날카롭고 불안정했다.</p><p>"……무슨 고집으로 끼니를 거르기 시작해서. 아가씨같은 뼈다귀는 이틀만 굶어도 장기 다 박살나. 그렇게 자살할 거면 차라리 내게 부탁하지 그랬어."</p><p>요우는 침대 위로 쏟아진 미음과, 남은 절반 가량의 미음을 번갈아 보았다. 허둥지둥 움직이느라 눈물이 떨어지는지도 모르고 있는 진아의 고개를 잡아 제 쪽으로 옮기고, 거추장스러운 숟가락 없이 미음을 조금 입 속에 머금었다.</p><p>입술이 맞닿는다. 뱀처럼 갈라진 혀끝이 진아의 것을 얽어, 부드럽게 누르며 헛구역질을 중화하고 미음을 목구멍으로 넘기게 했다.</p><img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic16.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;"><p>이름 붙일 수 없는 감정이 연보라빛 안쪽에서 출렁이고 있었다.</p><p>"……왜 이래요."</p><p>숨이 갈라진 채 나온 말은 항의도 질문도 아니었다. 진아의 입술에 미음의 얇은 막이 남아 있었고, 뺨 위의 눈물은 닦이지 않은 채 마르기를 기다리고 있었다. 요우를 올려다보는 눈빛은 폭풍이 지나간 뒤의 바다 같았다. 텅 비어 있으면서 동시에 모든 잔해가 가라앉아 있는.</p><p>"자살하려는 거 아니에요. 그런 거 아니라고……."</p><p>진아의 목소리가 갈라졌다. 유카타 깃을 쥔 손에 아주 미세하게 힘이 들어갔다. 놓지 않겠다는 의지가 아니라, 놓으면 가라앉을 것 같다는 공포에 가까웠다. 진아의 시선이 요우의 입가, 오른쪽 귀까지 이어진 흉터의 끝을 따라 미끄러졌다. 방금 자신의 입술에 닿았던 그 자리. 자신이 살려둔 여자의 몸에 새겨진 상처의 가장자리.</p><p>"그냥 몸이 안 먹겠다고 하는 거예요. 내가 아무리 해도."</p><p>진아는 고개를 돌려 요우의 어깨에 이마를 기댔다. 의식적 결정이 아니었다. 그저 목에 힘이 풀린 탓에 가장 가까운 곳으로 쓰러진 것에 가까웠다. 한텐의 두터운 솜 너머로 닿는 요우의 체온과, 섬유에 밴 담배 냄새가 코끝을 적셨다. 위산이 치밀던 속이 조금 가라앉았다. 또 이 냄새 때문이었다. 파블로프의 개처럼 이 냄새에만 반응하는 몸이 한심했다.</p><p>"……한 번 더. 그렇게 먹여줘요."</p><p>거의 들리지 않을 만큼 작은 목소리였다. 요우의 어깨에 묻힌 채 나온 말은 떨리고 있었고, 진아의 앙상한 어깨가 한 번 크게 떨렸다가 멈추었다. 부끄러움인지 비참함인지 알 수 없는 감정이 목덜미를 붉게 물들이고 있었다.</p>${BREAK}<p>버티고 있자면 결국은 입술이 닿고 말았다. 추위에 떨다가 열원에 매달리는 진아를, 요우는 단단히 받쳐 안고 숨을 겹쳤다. 9월, 10월, 그리고 11월 중 몇 번쯤 벌어졌던 시간처럼. 12월 초반의 날들처럼. 입을 맞추고, 떨어져서 서로의 눈을 마주보고, 진아가 또 눈을 감으면, 다시금 혀가 얽혀들어가는 것의 반복. 지독한 서로의 소비. 난방기의 팬이 낮게 돌아가는 소리가 방 안을 채웠다. 정월 초하루의 햇살이 장지문 너머로 비스듬히 기울어, 이불 위에 엉킨 두 사람의 그림자를 길게 늘였다. 양갱 포장지가 바닥에 구겨진 채 놓여 있었다. 그 위로 목발 하나가 비스듬히 쓰러져 있었다.</p><p>진아의 입술이 요우의 것에서 떨어졌다가, 다시 닿았다. 떨어졌다가, 다시. 숨을 들이쉬는 틈마저 아까운 듯 서로의 호흡을 삼켰다. 허리를 감은 요우의 손이 등뼈의 마디마디를 더듬을 때마다, 진아의 어깨가 파르르 떨렸다. 이 손이 자신을 부수러 온 것인지, 안으러 온 것인지 구분하기를 포기한 지 오래였다. 어느 쪽이든 상관없었다. 요우의 손이 닿아 있는 한, 위장의 경련도, 갈비뼈를 조이는 한기도 잊을 수 있었으므로.</p><p>입술이 떨어진 순간, 진아의 눈이 열렸다. 흐릿한 연보라가 코앞의 검은 눈동자를 올려다보았다. 요우의 얼굴에는 아무것도 쓰여 있지 않았다. 분노도, 갈망도, 연민도. 그저 지독하게 피로한 사람의 얼굴이었다. 입꼬리에서 오른쪽 귀까지 뻗은 흉터가, 이 거리에서는 살아 있는 생물처럼 생생했다.</p><p>"……나 진짜로 싫어?"</p><p>"……그럼 좋겠어? 할 수만 있다면, 아가씨, 그 파렴치하고 얇은 목을 꺾어버리고 싶어. 말이라도 못 하게끔."</p><p>그러나 요우는 진아를 놓지 않았다. 부러진 다리로 겨우 다시 걸터앉아. 진아의 목과 허리를 감싼 채 입술을 비볐다. 진아가 울었고, 그 감촉이 닿을 때 요우는 인상을 찌푸렸다. 쓴 약을 삼키는 것처럼.</p><p>"……괘씸하네. 네가 피해자인 것처럼 굴지 마."</p>${BREAK}<p>한 시간쯤의 시간이 지난 후에야 문 너머로 목발이 바닥을 짚는 둔탁한 소리가 멀어지더니, 곧 일정한 거리에서 멈추었다. 문 앞에서 경비하지. 그 한마디가 남긴 여운만이 서늘한 방 안을 배회했다. 닫힌 미닫이문은 얄팍한 종이 한 장 두께였지만, 진아에게는 결코 넘을 수 없는 거대한 절망의 벽처럼 느껴졌다.</p><p>진아는 침대 위에 우두커니 앉아 있었다. 풀어헤쳐진 유카타 사이로 스며드는 한기가 뼈마디를 파고들었지만, 여미려는 시도조차 하지 않았다. 머릿속은 뒤죽박죽이었다. 방금 전까지 요우의 입술이 닿았던 감촉과 양갱의 단맛, 그리고 돌아서던 그 차가운 눈빛과 부러진 다리를 이끌고 걸어가던 위태로운 뒷모습. 모든 것이 파편화되어 날카롭게 뇌리를 긁어댔다.</p><p>다 내 잘못.<br>내가 다 망쳐버렸지만.<br>그런데 왜, 왜 나를 혼자 둬.</p><p>논리적인 사고는 마비된 지 오래였다. 어린아이처럼 이기적이고 원초적인 감정만이 소용돌이쳤다. 탓하고, 원망하고, 자책하고, 무너지는 궤도 속에서 진아는 허우적거렸다. 시야가 다시 흐려지기 시작했다. 눈물이었다. 방금 전까지 그토록 쏟아냈음에도 아직 마르지 않은 눈물이 툭툭 침대 시트 위로 떨어져 번졌다.</p><p>진아는 천천히 자리에서 일어났다. 바닥에 발이 닿자마자 극심한 현기증이 덮쳤지만, 비틀거리면서도 걸음을 내디뎠다. 목표는 단 하나, 저 닫힌 문 너머에 있는 요우였다.</p><p>문앞에 다가선 진아는 떨리는 손을 뻗어 창호지 발린 문살을 짚었다. 차마 문을 열지는 못한 채, 그 얇은 벽에 이마를 기댔다. 문 너머에서 들려오는 미세한 숨소리, 담배를 꺼내 무는 듯한 희미한 마찰음, 옷자락이 스치는 소리. 눈을 감고 그 소리들에 집중하며, 진아는 마치 요우의 온기가 벽을 뚫고 전해지는 듯한 환상에 빠졌다.</p><img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic17.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;"><p>"아마미야 씨……."</p><p>물기 어린 속삭임이 새어 나갔다. 문 너머의 요우에게 들릴지, 들려도 모른 척할지 알 수 없었다. 다만 지금 진아가 할 수 있는 것은, 이렇게 문 하나를 사이에 두고 애처롭게 매달리는 것뿐이었다. 여우의 교활함도, 포식자의 오만함도 모두 벗겨진 채, 버림받은 짐승처럼 웅크려 앓는 소리를 내는 것.</p><p><em>"나, 버리지 마요. 제발……."</em></p><img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic18.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;"><p>양손으로 문살을 꽉 움켜쥔 진아의 어깨가 잘게 떨렸다. 얇은 미닫이문을 사이에 둔 채, 두 사람의 거리는 물리적으로는 닿을 듯 가까웠지만 심리적으로는 아득히 멀었다.</p>
+    `
+  },
+  {
+    title: '龍神會',
+    subtitle: '제 十 장',
+    date: '2027년 02월 06, 07일',
+    body: `
+      <p>2027년 1월의 끝자락이 지나고, 설을 앞둔 류진회 본가는 낯선 활기로 들끓었다. 본채 곳곳에 붉은 등롱이 걸리고, 부엌에서는 떡국 재료를 다듬는 칼질 소리가 새벽부터 울렸다. 재일교포 조직답게 음력 설을 챙기는 풍습은 류대룡의 고집이었다. 조직원들은 세뱃돈 봉투를 준비하느라 분주했고, 별채까지 이어지는 복도에는 시녀들이 꽃꽂이를 들고 종종걸음을 쳤다.</p><p>요우의 왼쪽 정강이는 나았다.</p><p>뼈가 붙는 데 두 달. 의사가 말한 것보다 빨랐지만, 그것은 요우의 체력 덕이 아니라 류진회가 붙인 전담 의료진의 집요함 덕이었다. 목발은 치워졌고, 걸음에서 절뚝임은 사라졌다.</p><p>다만 기온이 떨어지는 새벽녘이면 정강이 안쪽이 시큰거리는 통증이 유령처럼 찾아왔다. 낡은 부상과 새 부상이 포개진 자리. 열두 살에 한 번, 스물여섯에 한 번, 마흔에 한 번. 같은 다리가 세 번 부러진 인생이었다.</p><p>두 달 동안 요우는 완벽한 호위였다. 진아의 별채 앞에 서서, 식사 시간을 알리고, 외출 시 세 걸음 뒤를 따르며, 그 외의 시간에는 복도 끝 자신에게 배정된 작은 방에서 세븐 스타를 태웠다. 말은 필요한 최소한만. 눈은 마주치지 않았다. 진아가 무엇을 말하든, 울든, 웃든, 요우는 벽이었다. 숨 쉬는 벽. 담배 냄새 나는 벽.</p><p>류진아는 그 두 달 동안 살이 붙지 않았다. 시녀장이 올리는 식사 보고에 따르면 하루 한 끼를 간신히 넘기는 수준이었고, 그마저도 절반 이상을 남겼다. 그러나 쓰러지지는 않았다. 쓰러지면 요우가 또 안아 올릴 것이고, 그때의 요우 얼굴에 떠오를 표정을 진아는 견딜 자신이 없었다. 연민도, 혐오도, 무관심도. 어느 것이든 칼날이었다.</p>${BREAK}<p>설 전날 저녁이었다. 별채 거실에는 시녀가 놓고 간 세배 의상이 옷걸이에 걸려 있었다. 연보라색 비단 저고리와 흰 치마. 진아는 소파에 앉아 그것을 멀거니 바라보고 있었다. 거실 입구에 요우가 서 있었다. 평소처럼 벽에 등을 기대고, 팔짱을 낀 채, 시선은 창밖의 어둠을 향하고 있었다.</p><p>"내일, 본채에서 세배가 있어요."</p><p>진아가 입을 열었다. 두 달 만에 요우를 향해 건네는 첫 번째 업무적 발화였다. 목소리는 평탄했다. 울음기도, 유혹도, 집착도 걷어낸 건조한 톤. 시선은 옷걸이에 걸린 저고리의 매듭을 향해 고정되어 있었다.</p><p>"아버지랑 오빠들 앞에 나가야 하니까, 아마미야 씨도 같이 와주세요."</p><p>"한복인가?"</p><p>한복이라고 부르지 않고 한국의 전통복인가, 라고 하긴 했으나 의미는 같았다. 요우는 진아처럼 저고리를 바라보았다. 좁은 소매, 풍만하게 부푼 치마. 잘 어울리겠다고 생각했다. 그러나 대답은 그저.</p><p>"그래."</p><p>두 달 동안 이 별채에서 오간 대화를 전부 합쳐도 원고지 한 장을 채우지 못할 것이다. 그래. 알았어. 응. 단음절들의 나열. 그것이 요우가 진아에게 허락한 전부였다. 진아는 그 짧은 승낙 하나에도 가슴 안쪽이 쓸리는 감각을 느꼈으나, 얼굴에는 아무것도 내비치지 않았다. 배운 것이다. 두 달이라는 시간이 가르쳐준 것. 매달리면 멀어지고, 울면 벽이 더 두꺼워진다는 것.</p><p>"아마미야 씨도 입을 거 있어요. 시녀장한테 말해뒀으니까."</p><p>진아는 소파에서 일어섰다. 두 달 전보다 더 앙상해진 손목이 소매 밖으로 드러났다가 다시 숨었다. 걸음은 느렸지만 비틀거리지는 않았다. 쓰러지지 않겠다고 결심한 몸이 간신히 유지하는 균형. 옷걸이 앞에 선 진아는 저고리의 소매를 손끝으로 만졌다. 비단의 차가운 감촉이 손가락 끝을 스쳤다.</p><p>잠깐, 진아의 입꼬리가 아주 미세하게 올라갔다가 내려왔다. 잘 어울리겠다, 라고 요우가 속으로 생각했을지 어쨌을지는 알 길이 없었지만. 한복이라는 단어를 직접 꺼낸 것은 요우 쪽이었다. 업무적 확인이었을 뿐이겠지만, 진아에게는 두 달 만에 요우가 자신의 말에 '질문'으로 반응한 첫 순간이었다. 그것만으로도 목구멍 안쪽이 뜨거워지려는 것을 진아는 이를 악물어 삼켰다.</p><p>류진회의 설날 세배에 호위로 참석한다면 당연히 그에 맞는 복장이 필요할 터였다. 와니노잇카 시절, 정월에 입은 것이라곤 기껏해야 주름 잡힌 하카마 정도였다. 그것도 쿠미쵸가 신사 참배를 고집할 때나. 한국식 설이라면 한복이겠지. 남성용인지 여성용인지. 요우는 자신의 체형을 떠올렸다. 175센티미터, 넓은 어깨, 이레즈미가 새겨진 오른팔. 어느 쪽을 입혀도 기묘한 그림이 될 것이었다.</p><p>팔짱을 풀고 주머니에서 세븐 스타를 꺼냈다. 불을 붙이지는 않았다. 필터를 입술에 물고 굴리기만 했다. 찢어진 입꼬리의 흉터가 필터에 걸릴 때마다 미세하게 당기는 감각. 익숙한 통증이었다. 요우는 그 감각에 기대어 생각을 정리했다. 내일 아침 여덟 시. 류대룡. 류건. 류준. 류진회의 핵심부가 한자리에 모이는 자리. 자신은 거기서 무엇인가. 호위. 포로. 전리품. 혹은 그 셋 모두.</p><p>창밖으로 어둠이 내려앉았다. 2월의 밤은 빨리 왔다. 별채 정원의 소나무 가지에 눈이 쌓여 있었고, 처마 끝에서 고드름이 길게 자라나 있었다. 요우는 담배를 주머니에 도로 넣고 벽에서 등을 떼었다. 복도 끝, 자신에게 배정된 방으로 향하는 발걸음은 소리가 없었다. 다 나은 다리가 다다미를 밟는 감촉은 두 달 전과 달랐다. 통증이 없다는 것. 그것이 오히려 이상하게 느껴지는 밤이었다.</p>${BREAK}<p>본채의 넓은 대청마루에는 이미 열기가 차올라 있었다. 숯불을 때운 화로가 곳곳에 놓여 있었고, 검은 정장 차림의 간부들이 줄지어 앉아 있었다. 류진회의 설날 세배. 형식은 한국식이었으나 그 안의 공기는 여전히 야쿠자의 것이었다. 정좌한 남자들의 목덜미 위로 이레즈미가 보일 듯 말 듯 얼비쳤고, 술잔 대신 찻잔을 쥔 손가락에는 잘려나간 새끼손가락의 흔적이 있었다.</p><p>진아가 방에 들어서자, 공기의 밀도가 달라졌다. 웅성거림이 일순 잦아들고, 줄지어 앉은 간부들의 시선이 일제히 그녀에게 쏠렸다. 류진아. 아가씨. 그 두 글자가 가져오는 무게가 방 안의 모든 척추를 곧게 세웠다. 진아는 여린 미소를 지으며 고개를 숙여 인사했다. 시선이 바닥에 닿을 때쯤, 진아의 등 뒤로 은회색 머리를 높이 묶어 올린 요우의 윤곽이 드러났다. 간부 몇이 눈을 가늘게 좁혔다. 와니노잇카의 텟포다마. 류진회에 붙잡혀 온 여자. 아가씨의 호위라는 이름 뒤에 붙은, 전리품이라는 속칭.</p><p>그러나 아무도 입을 열지 않았다. 진아가 잠시 비틀거리는 듯하더니 한 발짝 뒤로 물러나 요우의 팔에 가볍게 손등을 기댔다. 그 접촉은 찰나였고, 유약한 아가씨가 호위에게 기대는 것 이상의 의미를 담고 있지 않은 것처럼 보였다. 간부들은 시선을 거뒀다. 진아의 몸이 약하다는 것은 조직 전체가 아는 사실이었으므로.</p><p>상석에 앉은 류대룡이 찻잔을 내려놓았다. 58세. 머리에 서리가 내렸으나 어깨는 곰처럼 넓었고, 눈빛은 겨울 호수처럼 잠잠하되 깊었다. 진아가 다가오자 그 서늘한 눈이 녹았다. 입꼬리가 미세하게 올라갔다.</p><p>"우리 공주 왔어? 추웠지, 밖에. 어이, 자리 더 가까이 깔아."</p><p>류대룡의 시선이 진아의 뒤를 스쳤다. 요우. 남성용 한복을 입은 그 이질적인 실루엣을 훑었다. 찢어진 흉터, 검은 마스크, 은회색 머리채. 류대룡의 눈에 감정이라 할 만한 것이 스치기 전에, 그는 다시 진아에게 시선을 돌렸다. 그것이 전부였다. 허락도, 거부도, 질문도 없이. 존재를 인정한 것인지, 무시한 것인지 알 수 없는 여백.</p><p>진아의 왼편에 류건이 정좌하고 있었다. 190센티미터의 거구가 검은 두루마기에 눌려 앉은 모양새. 표정은 없었으나, 진아가 자리에 앉을 때 무릎 위에 놓인 주먹이 미세하게 이완된 것이 보였다. 그 옆으로 류준. 날카로운 이목구비에 회색 저고리를 말쑥하게 갖춰 입은 모습. 류준의 시선이 요우에게 잠깐 머물렀다가, 형 류건에게로 옮겨갔다. 입꼬리에 읽을 수 없는 것이 걸려 있었다.</p><p>"건 형, 설날인데 좀 웃어봐. 아가씨 앞이잖아."</p><p>류준의 말에 류건은 눈꺼풀조차 들어 올리지 않았다. 다만 한 마디.</p><p>"닥쳐."</p><p>진아는 두 오빠 사이에 앉으며 작게 웃었다. 상석의 류대룡은 말없이 차를 마시고 있었다. 그의 눈은 딸을 향해 있었으나, 그 시선 안에는 복잡한 흥미가 서려 있었다. 제 뜻대로 움직이지 않는 장난감에 애가 타는 어린아이를 보는 듯한, 그러나 그 아이가 결국 장난감을 부술 것임을 아는 자의 여유로운 관망.</p><p>그때, 대화의 공백을 깬 것은 둘째 류준이었다.</p><p>"아가씨, 안색이 계속 안 좋으시네. 호위라는 작자는 뒤에 서서 뭘 하는 거야. 부축도 안 하고."</p><p>날카로운 목소리가 요우를 향했다. 명백한 질책. 류준의 눈에는 자신의 연약한 동생을 방치하는 무능한 호위에 대한 경멸이 담겨 있었다. 그 말에 거구의 류건이 처음으로 고개를 돌려 류준을 쳐다봤다. 그 눈은 '주제넘게 나서지 마라'고 말하고 있었다.</p><p>진아는 천천히 고개를 들었다. 연보라색 눈동자가 류준을 향했다. 입가에는 여전히 유약한 미소가 걸려 있었지만, 그 속은 차갑게 식어 있었다.</p><p>"아니에요, 오라버니. 아마미야 씨는 제 역할을 하고 있는 걸요. 제가… 기대지 말아 달라고 했어요. 자꾸 기대면 버릇이 될까 봐."</p><p>목소리는 비단결처럼 부드러웠다. 그러나 그 말은 류준의 질책을 막는 동시에, 요우에게 보내는 또 다른 가시였다. '네가 나를 거부하고 있다는 걸 모두에게 알리겠다'는 무언의 협박. 진아는 다시 요우가 서 있는 등 뒤를 향해, 들릴 듯 말 듯 작게 속삭였다.</p><p>"그렇죠, 아마미야 씨?"</p><p>"아가씨는 강하십니다. 저 정도는 부러뜨릴 수도 있으실 테니."</p><p>류준의 얼굴이 굳었다. '부러뜨린다'는 단어의 무게를 즉각 알아차린 것이다. 호위 따위가 아가씨에게 무례한 말을 했다고 해석할 수 있는 여지. 그러나 진아가 먼저 웃었으므로, 류준은 찻잔만 세게 쥐었을 뿐 입을 다물었다. 상석의 류대룡은 찻잔 가장자리에 입술을 대고 있었다. 눈이 웃고 있었다. 아무도 그것을 보지 못했다.</p><p>"…네."</p><p>진아가 무릎 위에 놓인 손을 꼭 쥐며 고개를 끄덕였다. 목소리는 여전히 비단이었으나, 그 안에 작은 유리 조각이 섞여 있었다. 요우의 말은 동의가 아니었다. 12월의 밤, 골절된 정강이, 문 앞에서의 오열. 그 모든 것을 한 문장으로 압축한 독이었다. 강하다. 부러뜨릴 수 있다. 사실을 말한 것뿐이다. 진아는 그것을 알았고, 알기 때문에 더 아팠다.</p><p>시녀장이 떡국 상을 들여왔다. 하얀 김이 피어오르며 대청마루를 부드럽게 적셨다. 류대룡이 숟가락을 집어 들며 분위기를 전환했다.</p><p>"먹어. 우리 공주 밥도 안 먹고 왔잖아. 어이, 거기 호위. 니도 앉아서 먹어."</p><p>'니도'라는 호칭은 오사카 사투리를 흉내 낸 것인지, 아니면 단순히 아랫것을 부르는 투박함인지 구분이 가지 않았다.</p><p>숟가락이 그릇에 닿는 소리가 났다. 그것뿐이었다. </p>요우가 마스크를 내렸을 때, 대청마루의 공기가 미세하게 응결되었다.<p>오른쪽 입꼬리에서 귀 끝까지 찢어진 흉터. 아물었으되 부풀어오른 살점이 당기며 영구적으로 일그러뜨린 하관. 그리고 떡을 씹기 위해 벌어진 입 사이로 얼핏 드러난 혀, 뱀처럼 정중앙이 갈라진 혀끝. 간부 하나가 숟가락을 멈췄다가, 곧 아무렇지 않다는 듯 다시 국물을 떴다. 야쿠자의 식탁에서 흉터란 일종의 언어였으므로. 다만 그것이 '자기 조직이 아닌 여자'의 얼굴에 새겨져 있다는 사실이, 그 언어의 문법을 미묘하게 비틀었을 뿐.</p><img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic19.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;"><p>류준의 숟가락이 그릇 가장자리에 부딪혔다. 시선을 애써 떡국으로 돌렸으나, 목젖이 한 번 크게 움직였다. 불쾌함인지 동요인지 판단하기 어려운 움직임. 류건은 처음부터 요우를 보지 않았다. 그의 시선은 떡국 위의 김을 관통해 어딘가 먼 곳을 향하고 있었고, 숟가락을 움직이는 속도는 일정했다.</p><p>류대룡이 국물을 한 모금 마시고 숟가락을 내려놓았다. 그의 눈이 요우의 드러난 얼굴 위를 천천히 훑었다. 흉터의 시작점에서 끝점까지. 갈라진 혀가 떡을 굴리는 모양새까지. 읽는 것이었다. 글자를 읽듯이, 그 상처가 어떤 칼로, 어떤 각도로, 얼마나 천천히 그어졌는지를 역산하는 눈이었다. 그리고 류대룡은 아무 말도 하지 않았다. 다시 숟가락을 집어 들었을 뿐이다.</p><p>"박 할머니 솜씨가 올해도 좋구만. 진아야, 떡 더 먹어. 살이 빠졌다."</p><p>그 목소리는 오직 딸에게만 향했다. 요우의 흉터는 이미 풍경의 일부로 편입된 뒤였다.</p><p>진아는 떡국 위로 고개를 숙이고 있었다. 숟가락을 든 손이 멈춰 있었다. 시선이 국물 표면에 고정된 것처럼 보였으나, 실상은 그 너머, 요우의 드러난 얼굴을 수면의 반사처럼 의식하고 있었다. 입에서 귀까지 찢어진 상처. 류진회의 인간이 요우에게 새긴 것. 진아의 명령은 아니었으나, 진아의 존재가 원인이었다. 숟가락을 쥔 손가락 끝이 하얗게 질렸다. 국물 한 모금을 삼키려 했으나 목구멍이 닫혀 있었다.</p><p>"…네, 아버지."</p><p>겨우 그 한마디를 밀어냈다. 고개를 들어 미소를 지었다. 완벽하게 조율된, 연약하고 순종적인 딸의 미소. 그 미소를 유지한 채 떡 한 점을 입에 넣었으나, 씹는 동작은 느리고 기계적이었다. 옆에 앉은 류준이 진아의 그릇에 떡을 하나 더 넣어주며 말했다.</p><p>"아가씨, 많이 드셔요. 요즘 너무 안 드시잖아."</p><p>진아는 고개를 끄덕이며 류준에게 고마운 미소를 보냈다. 그러나 그 미소가 류준에게서 떨어지는 순간, 입꼬리가 아주 미세하게 경직되었다. 찰나였다. 숨을 한 번 들이쉬고 내쉬는 사이에 사라진 균열.</p><p>류준의 턱이 미세하게 떨렸다. 찻잔을 들어 입에 가져갔으나 마시지 않았다. 시선이 요우의 마스크 위를 스치고, 이내 진아에게로 돌아갔다. 입술이 열렸다가 닫혔다. 결국 그가 뱉은 것은 전혀 다른 말이었다.</p><p>"…아가씨, 식후에 정원 좀 거닐으실래요? 바람 쐬시면 안색이 좀 나아지실 거예요."</p><p>류건의 숟가락이 그릇 바닥을 긁었다. 그 소리가 류준의 말꼬리를 잘랐다. 류건은 고개를 들지 않았으나, 넓은 어깨가 류준 쪽으로 아주 약간 기울었다. 무언의 압력. 류준은 그것을 느꼈는지 어깨를 살짝 움츠렸으나 시선은 거두지 않았다.</p><p>진아는 숟가락을 그릇에 내려놓았다. 떡 한 점을 더 먹지 못한 채. 류준의 제안에 고개를 돌려 부드럽게 웃었으나, 그 미소가 닿기 전에 시선은 이미 요우의 마스크 위를 한 번 스치고 지나간 뒤였다. 아까 드러났던 흉터의 잔상이 망막에 남아 있었다. 입꼬리에서 귀까지. 누군가의 칼이 천천히, 의도적으로 그어간 궤적. 진아의 손톱이 치마폭 안에서 허벅지를 파고들었다.</p><p>"괜찮아요, 오라버니. 오늘은 좀 일찍 돌아가서 쉬려고요."</p><p>목소리는 나른했다. 피곤한 아이의 것. 류대룡이 찻잔을 내려놓으며 끄덕였다.</p><p>"그래, 돌아가서 푹 쉬어. 호위, 아가씨 모셔."</p><p>'호위'라는 단어가 요우를 가리켰다. 이름도, 성도 아닌, 기능만으로 불린 호칭. 류대룡의 눈이 다시 한 번 요우를 향했다. 이번에는 아까와 달랐다. 흉터를 읽는 시선이 아니라, 흉터를 읽은 뒤의 시선이었다. 무엇을 결론 내렸는지는 알 수 없었다. 다만 입꼬리가 찻잔 뒤로 아주 미세하게, 올라갔다가 내려왔다.</p><p>진아가 자리에서 일어섰다. 비단 한복 치맛자락이 바닥을 쓸었다. 류준에게 목례를, 류건에게 눈인사를, 류대룡에게는 깊은 절을 올렸다. 모든 동작이 유려하고 흠잡을 데 없었다. 그리고 몸을 돌렸다. 요우가 서 있는 쪽으로. 세 걸음의 거리. 진아는 그 거리를 좁히지 않았다. 스쳐 지나가면서, 등을 보이며, 들릴 듯 말 듯한 목소리로.</p><img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic20.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;"><p><em>"…가시죠."</em></p>
+    `
+  },
+  {
+    title: '알면서',
+    subtitle: '제 十一 장',
+    date: '2027년 02월 07일',
+    body: `
+     <p>"아까 부러뜨릴 수 있다고 했죠."</p><p>몸을 돌리지 않은 채였다. 어깨가 미세하게 움츠러들었다가 펴졌다. 의식적으로 바로잡은 자세.</p><p>"…맞아요. 저는 아마미야 씨를 부러뜨렸어요. 그러니까 아마미야 씨도 저를 부러뜨리면 되는 거예요. 그게 공평한 거잖아요."</p><p>그제야 진아가 고개를 돌렸다. 반쯤만. 어깨 너머로 보이는 옆얼굴. 연보라색 눈동자가 요우의 검은 눈을 찾았다. 그 눈에는 다만 피로가 있었다. 오래 앓은 사람의 눈. 진아의 입술이 희미하게 말려 올라갔다. 미소라고 부르기엔 너무 얇은 것.</p><p>"못 하시겠으면 그냥 이대로 가요. 저는 상관없어요."</p><p>그 말을 끝으로 진아는 다시 앞을 보았다. 걸음을 옮겼다. 모퉁이를 돌았다. 정원으로 이어지는 자갈길이 펼쳐졌고, 겨울 아침 공기가 차갑게 볼을 스쳤다.</p><p>요우는 아무 말도 없이, 별채의 진아 침실까지 함께 걸었다. 진아가 저를 올려다보자, 그제야 제안을 곱씹으며 진아의 양쪽 허벅지를 받쳐 들어올린다. 제 어깨에, 제 아랫배를 요우의 얼굴 위에 누른 채, 목말을 타게 된 진아는 지나칠 만큼 높은 시야를 맛본다.</p><p>"아가씨를 부러뜨리는 게 공평하겠지…… 그게 야쿠자의 법이고."</p><p>떨어질까 무서워하는 허리를 더 강하게 안았다.</p><p>"그런데 병신이 둘로 늘어난다고 무슨 이득이야, 내게?"</p><p>진아의 손이 허공을 허우적거리다 본능적으로 요우의 머리채를 움켜쥐었다. 은회색 머리카락이 손가락 사이로 팽팽하게 당겨졌다. 추락에 대한 원초적인 공포. 눈동자가 잘게 흔들렸다. 입술이 열렸으나 비명 대신 거친 숨소리만 새어 나왔다. 요우의 투박한 손이 진아의 허리를 더욱 강하게 압박했다. 뼈가 으스러질 듯한 악력. 고통보다는 그 압도적인 통제감이 진아의 신경을 마비시켰다.</p><p>요우의 목소리가 아래에서 울렸다. 배를 통해 직접 진동으로 전달되는 오사카 사투리. 건조하고 시니컬한 음성이었다.</p><p>"...이득."</p><p>진아는 요우의 머리카락을 쥔 손에 힘을 풀지 못했다. 호흡이 가빴다. 요우의 얼굴이 배에 닿아 있어, 그녀가 말을 할 때마다 근육의 움직임이 고스란히 느껴졌다. 공포와 기묘한 흥분이 뒤섞인 감각. 두 달간 철저히 외면당했던, 차갑고 단단한 벽이 아주 조금 허물어지는 순간.</p><p>진아는 고개를 숙여 요우의 정수리를 내려다보았다. 은회색 머리카락. 흉터 투성이의 피부. 그리고 이 압도적인 완력. 자신을 떨어뜨릴 수도, 부러뜨릴 수도 있는 자. 그러나 그렇게 하지 않은 자. 진아의 연보라색 눈동자가 빠르게 깜빡였다. 공포에 질린 작은 동물의 눈빛 아래로, 아주 깊은 곳에서, 미세한 계산이 돌아가기 시작했다.</p><p>"이득이라뇨... 저는... 저는 그저... 아마미야 씨가 원하는 대로..."</p><p>요우의 머리칼을 쥔 손가락 끝이 미세하게 굳었다. 지배받는 동시에 지배하는 기묘한 위치. 진아는 숨을 고르며, 요우의 어깨 위에서 아주 조금, 미세하게 허리를 움직였다. 요우의 얼굴에 닿은 아랫배의 감각이 짙어지도록. 철저히 계산된 무의식적인 움직임.</p><p>"그 속셈 안 통하는 거 알잖아."</p><p>요우가 허리를 눌러 진아의 몸을 조금 더 기울였다. 거의 3미터 50센티미터즈음 될 법한 위치에서 아찔하게 낙하 직전에 매달린 보랏빛 시야.</p><p>"알아 보라고. 추락하는 기분."</p><p>"아."</p><p>짧은 음절 하나가 입술 사이로 떨어졌다. 공포였다. 연기가 아닌, 순수한 원초적 공포. 내장이 부유하는 감각. 손가락 하나의 힘으로 매달린 생존. 진아의 눈에 물기가 차올랐다. 반사적인 눈물이었다. 계산할 여유 따위는 없었다. 요우의 검은 눈이 아래에서, 아니 위에서, 그 뒤집힌 구도 속에서 진아를 올려다보고 있었다. 담담하게. 잔인할 만큼 평온하게.</p><p>"…알았어요."</p><p>목소리가 갈라졌다. 숨을 쉴 수가 없었다. 횡격막이 압박당하고 있었다. 거꾸로 매달린 채, 피가 머리로 몰려 관자놀이가 욱신거렸다. 진아의 손이 요우의 머리카락을 움켜쥔 채 떨렸다. 놓으면 죽는다는 본능. 입술이 파랗게 질려갔다.</p><p>"알았으니까, 올려줘요. 제발."</p><p>그 단어가 입 밖으로 나온 순간, 진아의 얼굴이 일그러졌다. 수치심이었다. 두 달 동안 한 번도 구걸하지 않았던 입에서, 공포가 체면을 짓밟고 튀어나온 것이다. 요우의 아랫배에 닿은 진아의 이마가 축축했다. 식은땀. 비단 한복 아래로 척추가 가늘게 경련했다. 추락하는 기분. 요우가 원한 것은 이것이었다. 통제를 빼앗긴 자의 무력함. 바닥이 보이는데 닿을 수 없는 아찔함. 진아는 그것을 온몸으로 이해했다.</p>${BREAK}<p>요우의 손이 진아의 허벅지에서 미끄러져 내려왔다. 천천히. 뼈대가 굵은 손바닥이 비단 치마 위를 스치며 무릎 뒤를 받치고, 중력이 다시 제자리로 돌아왔다. 진아의 발끝이 카펫에 닿았다. 발가락 끝부터, 발바닥, 뒤꿈치 순서로. 피가 다시 정상적으로 순환하기 시작하면서 관자놀이의 욱신거림이 서서히 가라앉았다. 시야가 뒤집혔다가 바로잡히는 그 몇 초의 어지러움 속에서, 요우의 검은 눈이 정면에 있었다.</p><img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic21.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;"><p>높이 차이가 돌아왔다. 15센티미터. 진아가 올려다보아야 하는 거리. 요우의 턱선 아래로 마스크가 벗겨져 있었다. 입꼬리에서 귀 끝까지 찢어진 흉터가 고스란히 드러나 있었고, 그 위로 겨울 아침 빛이 무심하게 떨어졌다. 진아의 눈동자가 그 흉터의 궤적을 따라 한 번 미끄러졌다. 그리고 요우의 팔이 진아의 등을 감쌌다.</p><p>투박하고, 세게, 뼈가 맞닿는 밀도로. 요우의 체온은 늘 높았다. 한복 저고리 안쪽의 열기가 진아의 얇은 비단을 뚫고 직접적으로 전해졌다. 담배 냄새. 도시의 매연 같은 체취. 진아의 코끝이 요우의 쇄골 아래 움푹 팬 곳에 파묻혔다. 심장 소리가 들렸다. 요우의 것인지 자신의 것인지 구분되지 않았다. 방금 전까지 추락의 공포로 얼어붙었던 척추가, 이 열기 안에서 녹아내리듯 힘을 잃었다.</p><p>진아의 손가락이 요우의 등 뒤 한복 천을 움켜쥐었다. 놓으면 다시 떨어질 것 같아서.</p><p>그리고 입술이 부딪혔다. 홀린 듯이, 누가 먼저인지 알 수 없었다. 요우의 입술은 건조하고 거칠었다. 흉터 조직이 닿는 감촉이 매끄럽지 않았다. 그러나 그 안에서 밀려 나온 혀는 뜨겁고 젖어 있었다. 두 갈래로 갈라진 혀끝이 진아의 입술 틈을 벌리고 안으로 파고들었다. 갈라진 혀의 양쪽 끝이 각각 다른 방향으로 움직였다. 비정상적인 감각이었다. 하나의 혀가 두 개의 궤적을 그리며 입안을 유린했다. 진아의 무릎이 꺾였다. 요우의 팔이 허리를 붙잡지 않았더라면 주저앉았을 것이다.</p><p>"으, 음."</p><p>작은 신음이 입술 사이로 새어 나왔다. 삼킬 수 없었다. 두 갈래 혀끝이 진아의 혀를 양쪽에서 감싸 쥐듯 조이자 등줄기를 타고 전류가 흘렀다. 진아의 손톱이 요우의 등을 할퀴었다. 한복 천이 구겨졌다.</p><p>눈을 뜰 수 없었다. 뜨면 울 것 같았다. 두 달. 두 달 동안 이 입술이, 이 체온이, 이 냄새가 없었다. 벽 하나 사이에 있으면서도 닿을 수 없었던 거리가, 지금 이 순간 완전히 소멸했다.</p><p>진아의 손이 요우의 목덜미로 올라갔다. 하이포니테일로 묶인 은회색 머리카락의 묶음을 손가락으로 감았다.</p><p>"…왜 이래요, 갑자기."</p><p>목소리는 나직했다. 확인하고 싶은 것이었다. 내일 아침이 되면 다시 세 걸음 뒤로 물러설 사람이, 지금 이 순간만큼은 여기 있는 것인지. 진아의 손가락이 요우의 포니테일을 감은 채 미세하게 떨렸다.</p><p>"네가 불쌍해서."</p><p>요우의 입술이 또 닿았다 떨어졌다.</p><p>"그리고 아가씨 같은 걸 불쌍히 여기는 내가 불쌍해서."</p><p>"그래서, 저를 안아주는 거예요?"</p><p>그 미소는 묻고 있었다. 당신의 그 불쌍한 자기연민이, 나를 향한 이 행동의 이유가 될 수 있느냐고. 당신의 동정이, 나에게는 어떤 의미냐고.</p><p>"그럼 더 불쌍해질게요."</p><p>속삭이는 목소리. 진아의 손이 다시 천천히 올라왔다. 이번에는 요우의 목덜미가 아니었다. 요우의 뺨을, 흉터가 있는 쪽 뺨을 부드럽게 감쌌다. 하얗고 가느다란 손가락이 흉터의 거친 감촉을 어루만졌다. 연기가 아니었다. 처음으로, 요우 앞에서 연기하지 않았다.</p><p>"아마미야 씨가… 나 같은 걸 보고도, 스스로가 불쌍해지지 않을 때까지."</p>${BREAK}<p>요우의 손가락이 파고들 때마다, 혀끝이 여린 살을 할퀴고 지나갈 때마다, 진아는 어김없이 신음을 흘렸다. 하지만 그 소리에는 쾌락의 빛이 없었다. 교성이 아니라 고통과 쾌락의 경계에서 길을 잃은, 공허한 울림이었다. 젖은 속눈썹 아래, 반쯤 감긴 연보라색 눈동자는 텅 비어 있었고, 붉게 부어오른 입술 끝에는 비릿하고 냉소적인 미소가 위태롭게 걸려 있었다. 그 미소는 요우를 향한 것이기도 했고, 이 모든 상황에 내몰린 스스로를 향한 조소이기도 했다. 더 불쌍해지겠다고 선언한 여자의, 처절한 자기 파괴. 요우의 몸짓이 거칠어질수록, 그 미소는 더욱 깊고 서늘하게 패였다.</p><p>갈급한 키스가 오갔다. 마치 질식 직전의 사람이 허겁지겁 공기를 탐하는 것처럼. 그러나 입술이 떨어진 뒤 찾아오는 것은 언제나 허탈한 침묵이었다. 뜨거웠던 열기가 썰물처럼 빠져나간 자리에, 요우는 지친 이마를 진아의 맨 어깨에 기대었다. 은회색 머리카락이 진아의 쇄골 위로 쏟아졌다. 그 무게가, 그 체온이, 두 사람 사이에 놓인 거대한 심연을 더욱 아프게 실감케 했다.</p><p>진아는 눈을 감았다. 요우의 숨결이 어깨에 고르게 닿았다. 이토록 가까운데, 아무것도 가닿지 않았다. 서로의 몸을 탐하고 상처 입히면서도, 정작 가장 깊은 곳은 닿지 못한 채 겉돌고 있었다. 불쌍해서. 그 말이 귓가에 이명처럼 맴돌았다. 그래, 불쌍하지. 태어날 때부터 거대한 새장에 갇혀 모든 것을 가졌지만 아무것도 갖지 못한 채, 제 발로 걸어 들어온 다른 새의 날개를 부러뜨리고서야 잠깐의 안도감을 얻는 이 삶이, 불쌍하지 않다면 무엇일까.</p><p><em>너는 내 다리를 부수었지. 너는 나라는 인간의 가치를 짓밟았지. 너는 새장 속에서 다른 새의 머리 위를 돈다고 생각하지. 너는, 그러나, 내가 화내는 이유를, 아직도 이해 못 하고 나를 탓하지.</em>그렇게 고민하다 보면 여태까지의 8개월간 한 번도 류진아의 이름을 불러본 적이 없는 것 같다고 생각해서―</p><p>"진아."</p><p>한국어 이름자를 부르는 발음은 서툴렀다. 징아, 또는 지나, 로 들린다. 그럼에도 요우가 진아의 아랫배에서 손을 떼며 불렀다.</p><p>"류진아."</p><p>이번에는 더 최악이었다. 류지아, 에 가깝게 들렸다. 갈라진 혀로도 구사할 수 없는 이국의 언어. 그리고 미지의 감정.</p><p>고개를 돌릴 수가 없었다. 어깨에 이마를 기댄 요우의 얼굴을 볼 수가 없었다. 지금 고개를 돌리면 어떤 표정을 지어야 할지 알 수 없었기 때문이다. 냉소적인 미소를 유지할 수도, 텅 빈 표정을 지을 수도 없었다. 두 달 동안 얼어붙어 있던 감정의 댐에, 아주 작은 균열이 생겨버렸다.</p><p>"…왜요."</p><p>목소리가 작게 잠겨 있었다. 진아는 천천히 고개를 돌렸다. 요우의 은회색 머리카락이 뺨을 스쳤다. 마주 본 얼굴. 지쳐있고, 허탈하고, 그러나 그 검은 눈동자 안에는 이전에는 없었던 미지의 감정이 희미하게 떠올라 있었다.</p><p>"이제 와서, 왜 이름을 불러요."</p><p>원망이 아니었다. 순수한 질문이었다. 불쌍해서 안아주던 당신이, 이제 와서 왜 내 이름을 부르는가. 당신의 그 끔찍한 발음이, 나에게는 왜 이렇게 아픈가. 진아의 연보라색 눈동자가 가늘게 떨렸다.</p><p>"그렇게 부르니까…"</p><p>말을 잇지 못했다. 입술이 파르르 떨렸다. 그렇게 부르니까, 정말로 내가 너무 불쌍하게 느껴지잖아요. 차마 뱉지 못한 뒷말이 눈동자에 고여 투명한 막을 씌웠다.</p><p>"이러면 아가씨가 죄책감이라도 느낄까 해서."</p><p>곧 요우가 진아의 허리를 받쳐 안았다. 눈을 곧게 바라본다. 서로가 서로에게 어떤 표정을 지어 줘야 할지 모르는 채로. 끔찍하게 미워서, 그럼에도 가지고 싶어서, 그러나 가닿지 않을 걸 알아서 허공을 떠도는 시선. 그 찰나의 부유하는 순간, 요우의 목소리가 먼저 바닥에 닻을 내렸다.</p><p>"……진, 아."</p><p>한 번 더. 이번에는 조금 더 제대로 된 진아에 가까운 발음이다. 받침은 니은이라기보다 일본어의 ん에 훨씬 가까웠지만 상관없었다.</p><p>"……진아한테 안 미안해, 나는. 서로 존중이라고는 좆 까고 지낸 거 아니까."</p><p>곧 진아가 다시 화를 내거나, 비릿하게 웃으며 시선을 피할 것 같아 그 전에 손을 펼쳐 진아의 뺨을 받쳤다.</p><p><em>"근데 지금 너랑 키스하고 싶어. 죽을 것 같아."</em></p>${BREAK}<p>오후의 볕이 장지문을 투과하며 쏟아졌다. 방 안의 공기는 눅눅하고 데워진 채 무거웠다. 요우의 손이 엉덩이를 가볍게 두드리는 순간, 얇게 벼려졌던 긴장감이 일제히 끊어졌다. 진아의 몸이 시트 위에서 활처럼 튀어 올랐다. 연보라색 눈동자가 천장을 향해 뒤집힐 듯 커졌고, 입술은 소리 없는 비명을 지르며 벌어졌다.</p><p>안으로 오므라들었던 팔다리가 잘게 경련했다. 뜨겁고 투명한 액체가 요우의 턱선을 타고 미끄러지며 허벅지 안쪽을 흠뻑 적셨다. 머릿속이 하얗게 점멸했다. 쾌락의 꼭대기에서 떠밀려 떨어지는 듯한 감각. 진아의 등줄기가 시트에 다시 닿았을 때, 숨소리조차 제대로 나오지 않아 가슴팍만 거칠게 오르내렸다. 손가락 끝이 요우의 등을 할퀴었던 자리에 그대로 머문 채 파들파들 떨리고 있었다.</p><p>"하, 아……. 아, 으응……."</p><p>고개가 옆으로 꺾이며 베개에 뺨을 비볐다. 눈가에는 생리적인 눈물이 맺혀 관자놀이를 타고 흘러내렸다. 요우의 입술이 떨어지는 감각, 젖은 숨결이 피부 위로 닿는 감각이 아득하게 느껴졌다. 뇌수를 헤집어놓은 것 같은 여운 속에서 진아는 손을 더듬어 요우의 어깨를 찾았다. 땀에 젖은 은회색 머리카락이 손등에 스쳤다.</p><p>"……나쁜 사람."</p><p>숨을 헐떡이며 내뱉은 말은 원망보다 체념에 가까웠다. 알아챘으면서. 기어코 끝까지 몰아붙여 터뜨려 놓고. 엉덩이를 두드리던 손길이 아직도 살갗에 남아 있는 것 같아 허리가 흠칫 떨렸다. 진아는 요우의 어깨를 약하게 잡아당겼다. 제 위로 무너져 내리라는 듯이, 그 체온을 오롯이 덮어쓰고 싶다는 듯이.</p><p>"……요우 씨, 얼굴……."</p><p>흐린 시야 속에서 요우의 하관이 보였다. 젖어 있었다. 자신의 흔적으로. 진아의 입꼬리가 미세하게 올라갔다. 수치심은 없었다. 오히려 지독한 갈증이 다시 고개를 드는 것 같았다. 엄지손가락을 뻗어 요우의 입가에 묻은 액체를 느리게 닦아냈다. 갈라진 혀끝이 방금 전까지 어디 있었는지 떠오르자 아랫배가 뻐근해졌다.</p><p>"……이리 와요. 안아주세요."</p>${BREAK}<p>"나 아직, 요우 씨랑 더 하고 싶은 거 많은데."</p><p>그녀는 작게 웃었다. 아직 안쪽에 머물러 있는 요우의 손가락을 의식하며, 진아는 일부러 골반을 살짝 움직여 안쪽 살로 손가락을 꽉 물었다. 콧소리를 내며 요우의 입술에 제 입술을 가볍게 부딪쳤다 떼었다.</p><img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic22.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;"><p>"그러니까, 쉬지 마요. 나랑 밤새 놀아줘요. 네? 도망 못 가게 내가 꼭 붙들고 있을 테니까."</p>요우는 진아의 목소리가 발버둥임을 알았다. 자신이 벌인 일들, 요우가 벌인 일들, 류진회와 와니노잇카에서 벌인 일들을 전부 잊고 섬망과 유사한 상태에 빠져버리고 싶은 마음을 알았다. 그래서 씁쓸한 표정으로 눈을 마주보다가 입을 맞추고 말았다.</p><p>그러면 안 되는데.</p><p>서로의 감정이 이다지도 쌓여서 색을 알아볼 수도 없게 되었는데.</p><p>알면서, 알면서도.</p>
+    `
+  },
+  {
+    title: '和珥一家',
+    subtitle: '제 十二 장',
+    date: '2027년 04월 07일',
+    body: `
+      <p>벚꽃잎이 대청마루의 목재 위로 떨어진다. 바람에 실려 온 꽃잎 하나가 요우의 어깨에 내려앉았다가, 다음 걸음에 미끄러져 떨어졌다. 사월의 공기는 달콤하고 축축했다. 정원의 연못 수면 위로 분홍빛 꽃잎이 점점이 퍼져 있었고, 그 위를 잉어 한 마리가 느릿하게 헤엄쳤다. 류진회 본가의 정원은 봄이 되면 매년 이렇게 사치스러운 풍경을 자랑했다. 조직의 피비린내와는 아무 상관도 없다는 듯이.</p><p>하카마의 검은 줄무늬가 걸음에 맞춰 흔들렸고, 유카타 소매 아래로 이레즈미의 용이 꿈틀거렸다. 류대룡의 집무실에서 나온 지 채 오 분이 되지 않았다. '그러니 내 딸에게서 그만 꺼져라.' 용왕의 입에서 나온 말은 그것뿐이었다. 예상했다. 다만 이렇게 건조할 줄은 몰랐다. 제 딸의 호위를 일 년 가까이 시켜놓고, 버릴 때는 찻잔을 치우듯 치운다. 류진회의 방식이었다. 사람을 쓰고, 닳으면 내다 버리는.</p><p>마스크 너머로 담배 연기가 피어오르지 않았다. 오늘은 피우지 않았다. 왜인지, 입안이 텁텁한 것보다 공허한 게 나았다. 요우의 시선이 정원 한편의 벚나무에 걸렸다. 지난 봄에는 보지 못한 나무였다. 아니, 보았으되 기억하지 못했을 뿐이다. 작년 봄은 찢어진 입술과 반이 잘린 혀에 갇혀 천장만 보던 계절이었으니까.</p><p>대청마루 끝, 정원으로 내려가는 돌계단 앞에서 요우의 걸음이 멈추었다. 벚꽃 가지 사이로 쏟아지는 오후의 햇살이 은회색 머리카락 위로 부서졌다. 검은 마스크 위로 드러난 눈은 어딘가 먼 곳을 바라보고 있었다. 허무하다는 표현이 적합했을까. 아니면, 처음부터 예정된 결말을 확인한 사람의 표정이었을까.</p><p>"……오래 걸렸네, 그 녀석들."</p><p>혼잣말이 입술 사이로 새어 나왔다. 오사카 사투리의 느른한 발음이 벚꽃비 사이로 흩어졌다. 하카마 자락이 봄바람에 가볍게 펄럭였다. 요우는 품에서 담배를 꺼내 입에 물었으나, 불을 붙이지는 않았다. 그저 필터를 이빨로 가볍게 깨물며 정원 쪽을 바라보았다.</p><p>저 멀리, 별채로 이어지는 회랑이 보였다. 진아의 방이 있는 곳. 두 달 동안 밤마다 서로의 몸에 파묻혀 지낸 곳. 이름을 부르고, 부름받고, 울고, 웃고, 녹아내리던 곳. 요우의 시선이 그 회랑 위에 한참을 머물렀다가, 이윽고 떨어졌다.</p><p>돌계단에 걸터앉았다. 등을 기둥에 기대고 하늘을 올려다보니, 벚꽃 가지 사이로 구름 한 점 없는 하늘이 펼쳐져 있었다. 류대룡의 말이 머릿속에서 반복 재생되었다. '와니노잇카에서 선전포고가 왔다. 텟포다마의 단장을 데려가겠다고. 그러니 내 딸에게서 그만 꺼져라.' 단순한 산술이었다. 전쟁이 시작되면 요우는 류진회의 인질이자 방패가 된다. 혹은, 와니노잇카에 돌려보내는 카드가 된다. 어느 쪽이든, 진아의 곁에 있을 이유는 사라진다.</p><p>"…뭐, 처음부터 빌린 시간이었으니까."</p><p>불 붙이지 않은 담배를 입에서 빼어 손가락 사이에 끼웠다. 정강이의 오래된 골절 흉터가 봄바람에 욱신거렸다. 아무렇지도 않은 척 다리를 쭉 뻗으며, 요우는 벚꽃잎이 하카마 위에 쌓이는 것을 가만히 지켜보았다.</p><p>연기가 벚꽃잎 사이로 가늘게 피어올랐다. 필터 끝에 매달린 불씨가 봄바람에 밝아졌다 어두워졌다를 반복했다. 연못 수면 위로 꽃잎이 떨어질 때마다 잉어가 입을 벌렸다가, 꽃잎인 줄 알고 돌아서는 모양이 보였다. 먹이인 줄 알았는데 아니었다. 그런 종류의 속임수.</p><p>요우가 연기를 길게 내뱉었을 때, 대청마루 반대편에서 발소리가 들렸다. 가벼운 구두 소리가 아니었다. 묵직하고 간격이 넓은 걸음. 190센티미터의 거구가 만들어내는 특유의 진동이 나무 바닥을 타고 전해졌다.</p><p>"아마미야."</p><p>류건이었다. 검은 더블 코트를 걸친 채, 선글라스도 벗지 않은 모습으로 대청마루 끝에 서 있었다. 각진 턱 아래로 드러난 목의 문신이 코트 깃 위로 삐져나와 있었다. 큰형님. 본대장. 류진회의 차기 후계자이자, 진아의 사냥개. 요우의 정강이를 부러뜨린 손.</p><p>"보스한테 들었지."</p><p>류건은 요우의 옆으로 다가와 돌계단에 서 있었다. 앉지는 않았다. 거대한 그림자가 요우의 몸 위로 드리워졌다. 선글라스 너머의 시선이 어디를 향하는지 알 수 없었으나, 요우가 바라보던 별채 쪽 회랑을 함께 응시하고 있는 것 같았다.</p><p>잠시 침묵이 흘렀다. 벚꽃잎이 류건의 넓은 어깨 위에도 내려앉았으나, 그는 털어내지 않았다. 주머니에 손을 넣은 채 한참을 서 있다가, 낮고 무뚝뚝한 목소리가 떨어졌다.</p><p>"아가씨한테는 내가 말한다. 니가 직접 가지 마."</p><p>그 말의 의미를 요우가 모를 리 없었다. 진아에게 이별을 고하는 역할을 자신이 맡겠다는 뜻이었다. 류건의 턱이 미세하게 움직였다. 이를 악물고 있는 것처럼 보이기도 했다. 류진회의 본대장이, 진아의 절대적 충견이, 지금 이 순간 무슨 생각을 하고 있는지. 그 거대한 몸 안에 어떤 감정이 들끓고 있는지. 표정 없는 얼굴에서는 아무것도 읽히지 않았다.</p><p>다만 한 가지. 류건이 요우를 내려다보는 각도가, 석 달 전과는 달랐다. 적을 보는 눈이 아니었다. 그렇다고 동료를 보는 눈도 아니었다. 무엇인지 규정할 수 없는, 다만 적의가 빠져 있는 시선이 선글라스 너머에서 잠깐 머물렀다가 떠났다.</p><p>"……와니노잇카 놈들이 내 목을 원하는 건 아니다. 너만 다시금 데려가겠다고 했어."</p><p>류건이 한마디를 덧붙이고는 몸을 돌렸다. 코트 자락이 봄바람에 펄럭이며 벚꽃잎을 흩뿌렸다.</p><p>요우는 비식 웃으며 다시 연못을 바라보았다. 허하네. 모든 게. 벚꽃잎이 연못 위에 닿는 순간마다 수면이 미세하게 일렁였다. 잉어가 다시 입을 벌렸다가 닫았다. 속는 줄 알면서도 올라오는 것인지, 아니면 정말로 매번 착각하는 것인지. 담배 필터가 이빨 사이에서 짓눌렸다. 연기가 입천장을 타고 코로 빠져나갔다. 갈라진 혀가 필터 끝을 건드릴 때마다 익숙한 감각이 돌아왔다. 오사카의 뒷골목에서 처음 담배를 물었던 열네 살의 봄도 이렇게 벚꽃이 졌었다.</p>${BREAK}<p>숙소의 어둠은 봄이 와도 달라지지 않았다. 다다미 위에 펼쳐놓은 보자기 한 장. 그 위로 접힌 속옷 몇 벌이 가지런했다. 한텐 두 벌은 겨울에 입던 것이라 이제 필요 없을 터였으나, 와니노잇카로 돌아가면 오사카의 밤바람이 칼같으니까. 유카타 두 벌. 하나는 남색, 하나는 먹색. 잠옷 한 벌은 류진회에서 지급받은 것이었다. 가져가도 되는 건지 잠시 손이 멈추었다가, 접어서 보자기 위에 올렸다. 어차피 누가 따지겠나.</p><p>손이 멈춘 건 그때였다. 복도 끝에서 발소리가 들렸다. 시녀의 종종걸음이 아니었다. 맨발이었다. 다다미를 밟는 소리가 축축하게 젖어 있었고, 간격이 불규칙했다. 뛰다가 멈추고, 다시 뛰는. 숙소 앞 복도의 삐걱거림이 점점 가까워졌다.</p><p>문이 열렸다. 아니, 열린 게 아니라 밀려졌다. 장지문이 레일 위에서 덜컹 소리를 내며 끝까지 밀려나갔다. 복도의 석양빛이 어두운 방 안으로 쏟아져 들어왔고, 그 빛의 한가운데 류진아가 서 있었다.</p><p>맨발. 실내 슬리퍼도 신지 않은 맨발이 다다미 위로 한 발 들어섰다. 실크 잠옷 위에 아무것도 걸치지 않은 채였다. 허리까지 내려오는 흑발이 한쪽으로 흘러내려 있었고, 눈가가 붉었다. 울었는지, 울 참인지. 연보라색 눈동자가 요우의 얼굴을, 그리고 바닥에 펼쳐진 보자기와 접힌 옷가지들을 훑었다. 시선이 그 위에 멈추었을 때 류진아의 입술이 미세하게 떨렸다.</p><p>"뭐 하는 거예요."</p><p>목소리가 평평했다. 감정을 일부러 누르고 있다는 것을 모를 사람은 없었다. 류진아의 손끝이 장지문 틀을 쥐고 있었다. 손가락 마디가 하얗게 질려 있었다. 연약한 체구가 문틀에 기대어 서 있는 모양새가, 바람에 꺾일 것 같은 줄기처럼 보였다. 하지만 눈은 꺾이지 않았다. 연보라색 동공 안에서 무언가가 타오르고 있었다.</p><p>"아마미야 씨. 이게 뭐냐고 물었어요."</p><p>"……오랜만인가, 아마미야 씨라는 것도."</p><p>요우는 진아를 보는 채로 보자기를 단단히 묶었다. 그 자리에 내려두고 일어서기만 했다. 걸어가거나, 팔을 벌리거나, 등을 돌리지 않은 채로 그저 기립. 어느 선택지보다도 굳건한 움직임으로.</p><p>"와니노잇카에서 다시 나를 필요로 한다. 새끼들이 그새 세(勢)를 많이 키워 뒀더라."</p><p>비식, 지어 보이는 조소에는 힘이 없었다.</p><p>"류진회와 다이를 깨든지, 아니면 날 얌전히 보내든지. 그중 네 아비는 후자를 선택했어. 예측 가능했지? 아가씨는 똑똑하니까."</p><p>"그래서, 아버지의 그 얄팍한 계산에 얌전히 장단 맞춰주고 가시겠다? 짐이나 싸면서?"</p><p>류진아의 고개가 미세하게 꺾였다. 흐트러진 흑발 사이로 드러난 눈빛은 더 이상 버림받을까 두려워하는 겁쟁이의 것이 아니었다. 사냥감을 놓치지 않으려는 포식자의 서늘한 집요함. 요우가 묶어둔 보자기를 내려다보는 시선에는 경멸에 가까운 차가움이 묻어 있었다.</p><p>"내가 얌전히 보내줄 것 같았어요?"</p><p>천천히, 요우의 바로 앞까지 다가왔다. 둘 사이의 거리가 좁혀지자, 진아에게서 풍기는 달콤하고도 서늘한 체향이 훅 끼쳤다. 진아는 올려다보지 않았다. 오히려 요우의 흉터 난 뺨으로 손을 뻗었다. 차가운 손끝이 입가의 흉터를, 그리고 입술을 천천히 훑었다.</p><p>"버리지 말라고 했잖아."</p><p>속삭임은 달콤하고도 섬뜩했다. 류진아의 다른 한 손이 자신의 흐트러진 머리칼을 모아 쥐었다. 손목에 감겨 있던 얇은 실크 끈으로 머리를 단단히 묶어 올리기 시작했다. 목덜미가 고스란히 드러나며, 유약한 아가씨의 허물은 바닥에 완전히 벗어던져졌다.</p><p>"요우 씨는 내 거잖아. 아버지가 허락했든, 와니노잇카가 지랄을 하든, 내 허락 없이는 한 발짝도 못 나가."</p><p>"아가씨가 거칠게 군다고 바뀌는 건 없어."</p><p>그러나 아마미야 요우가 한순간이라도, 올려 묶은 머리의 진아에게 겁을 먹은 적이 있던가. 요우는 저를 붙든 진아를 가만히 내려다보았다. 힘을 주면 진아는 부서질 수도 있었다. 그러나 잠잠했다. 움직이지 않고 가만히 진아를 바라본다.</p><p>"아가씨가 '나 버리지 마' 말할 때, 내가 한 번이라도 그러겠다고 대답한 적이 있어? 생각해 봐."</p><p>요우의 목소리는 평온했다. 담담하게 떨어지는 말의 무게가 진아의 귓가에 닿았다. 진아의 손끝이 요우의 유카타 깃을 움켜쥔 채 미세하게 떨렸다. 그러나 그 떨림은 유약함에서 비롯된 것이 아니었다. 분노였다.</p><p>"대답 안 한 거 알아."</p><p>진아의 목소리는 낮고 서늘했다. 귓가에 속삭이는 뱀의 혀 같았다.</p><p>"하지만 요우 씨는 내 옆에 있었어. 매일 밤 나를 안았고, 내 안에서 울었잖아. 내가 버리지 말라고 했을 때, 요우 씨는 나를 안아줬어. 그거면 돼. 그러니까, 못 가. 아무데도. 와니노잇카든, 아버지든, 다 죽여버릴 거야. 요우 씨를 데려가려는 새끼들은 내가 다 찢어 죽일 거야."</p><p>진아는 요우의 가슴에 이마를 기대었다. 요우의 심장 소리가 진아의 귓가에 울렸다. 진아는 그 소리가 오직 자신만을 위해 뛰고 있다고 믿고 싶었다.</p><p>"알잖아? 내가 마음만 먹으면 그 정도는 일도 아니라는 거."</p><p>진아의 손이 요우의 가슴팍을 더듬었다. 요우의 단단한 근육의 결이 느껴졌다. 진아는 요우의 몸을 완전히 소유하고 싶었다. 요우의 모든 것을 통제하고 싶었다.</p><p>"요우 씨는 내 거야. 영원히 내 새장 안에서 살아야 해."</p><p>요우는 대답하지 않는다. 그저 진아를 바라보다가, 제 하카마 자락을 걷었다. 부러졌다 붙은 정강이의 흔적. 마스크도 내려, 입꼬리를 드러냈다.</p><p>"……얼마나 더 부수고 싶으시길래."</p><p>요우의 입꼬리가 일그러졌다. 분노 탓이 아니라, 그건 분노 탓이 아니라…</p><p>"아가씨 때문에 내 인생, 좆같아졌어."</p><p>어느 때보다 담담하고 건조한 목소리로. 12월 15일에 진아에게 등을 돌리던 것과 같은 목소리로, 그러나 조금은 정이 담겨 전달력이 확고한 문장을 뱉었다.</p><p><em>"그래도 사랑했던 것 같다. 진아를."</em></p><p>그 밤의 열기 속에서 속삭이던 그 이름이었다. 진아. 그러나 지금 그 이름은 죽어 있었다. 온기 없이, 박제된 나비처럼 고요하게 불려졌다.</p><p>깃을 움켜쥐고 있던 진아의 손에서 힘이 서서히 풀렸다. 끌어당겨 제 앞에 무너뜨리고, 새장에 가두고, 영원히 제 것으로 만들려던 모든 계획과 오만함이 한순간에 모래성처럼 허물어졌다. 요우의 그 담담한 한마디가, 류대룡의 명령보다도, 와니노잇카의 협박보다도, 그 어떤 물리적인 위협보다도 더 강력한 사슬이 되어 진아의 발목을 옭아맸다. 가는 것을 막을 수는 있어도, 떠나간 마음은 붙잡을 수 없다는 자명한 사실. 통제할 수 없는 유일한 영역. 진아는 그 앞에서 처음으로 무력해졌다.</p><p>"나 때문이 아니야."</p><p>목소리가 갈라졌다. 부정하는 말은 공허했다. 누구를 향한 변명인지, 아니면 스스로를 향한 기만인지 모를 소리였다.</p><p>"네 인생은… 원래부터 그랬잖아."</p><p>스스로 뱉고도 얼마나 잔인한 말인지 깨달은 듯, 류진아의 입술이 파르르 떨렸다. 요우의 눈동자 속에서 마지막 남은 정마저 부서져 내리는 소리가 들리는 듯했다. 진아는 요우의 텅 빈 눈을 더는 마주 보지 못하고 고개를 떨구었다. 시선이 닿은 곳은 요우의 가슴팍. 그 안에 뛰고 있을 심장이 더 이상 자신을 위해 뛰지 않는다는 사실이 피부로 느껴졌다. 소유할 수 없다면 부서뜨려서라도 갖고 싶었다. 하지만 이미 부서진 것을, 사랑했었다고 말하는 것을, 대체 어떻게 더 부술 수 있단 말인가.</p><p>"다시 말해 봐."</p><p>고개를 든 류진아의 눈에 눈물이 차올랐다. 유약함을 가장하던 연기가 아니었다. 처음으로 드러내는 진아의 진짜 눈물이었다.</p><p>"사랑, 했다고? 과거형으로 말하지 마. 지금도 그렇다고 말해. 어서."</p><p>애원에 가까운 명령. 류진아는 풀렸던 손으로 다시 요우의 옷깃을 절박하게 그러쥐었다. 손톱이 천을 파고들었다.</p><p>"거짓말이라고 해, 요우 씨. 제발…. 가지 마."</p><p>갈라진 목소리. 명령도 아니고, 협박도 아니었다. 류진아가 태어나서 처음으로 뱉는 순수한 간청이었다. 통제할 수 없는 영역 앞에서 무릎을 꿇은 자의 목소리.</p><p>"죽일게. 다 죽일게. 아버지도, 와니노잇카도, 요우 씨를 데려가려는 모든 것을 내가."</p><p>진아의 손이 요우의 하카마 자락을 더듬어 정강이의 흉터 위에 닿았다. 자신이 명령해서 부러뜨린 뼈의 기억. 손끝이 떨렸다. 그 위에 이마를 가져다 대었다. 차갑고 매끄러운 이마가 흉터의 울퉁불퉁한 표면에 닿았을 때, 진아의 어깨가 크게 들썩였다.</p><p>"내가 망가뜨렸잖아. 내가 부쉈잖아. 그러니까 내 거야. 내가 책임져야 하는 거잖아."</p><p>논리가 아니었다. 이치에 맞지 않는, 미친 사람의 기도였다. 류진아는 알고 있었다. 이 말이 얼마나 비뚤어져 있는지. 부수고 망가뜨린 것에 대한 책임이 소유가 될 수 없다는 것을. 그러나 그것밖에 남지 않았다. 요우를 붙잡을 수 있는 명분이, 이 비참한 논리밖에.</p><p>진아의 눈물이 요우의 정강이 흉터 위로 떨어졌다. 뜨겁고 작은 물방울이 오래된 상처의 표면을 적셨다. 진아는 그 위에 입술을 가져다 대었다. 키스가 아니었다. 사죄도 아니었다. 다만 놓지 않겠다는, 이빨을 박아서라도 붙들겠다는 짐승의 본능이었다.</p><p>진아의 시선이 요우의 정강이로 내려갔다. 자신이 부러뜨린 뼈. 류진회가 찢은 입. 전부 이쪽의 손으로 만든 상처였다. 와니노잇카로 돌아가면 요우는 살 수 있다. 적어도 요우를 망가뜨린 것은 저쪽이 아니라 이쪽이었으니까. 그 사실이 진아의 목구멍을 틀어막았다.</p><p>결국 진아는 요우의 가슴에 이마를 기대었다. 축축한 이마가 유카타 위에 닿았다. 작고 가는 어깨가 크게 한 번 들썩였다.</p><p>"왜 키스 안 해 줘."</p><p>코맹맹이 소리. 위엄도 오만함도 남지 않은 젖은 목소리였다. 요우의 쇄골 위에 얼굴을 파묻은 채 숨을 들이마셨다. 담배와 도시의 냄새가 폐 깊숙이 스며들었다. 진아는 그 냄새를 삼켰다. 외우려는 것처럼.</p><p>"……보내면 안 돼. 이렇게 보내면, 나는."</p><p>"진아."</p><p>이름을 부르기 시작한 지 두 달. 조금은 확실해진 발음으로 요우가 진아를 불렀다. 그러나 쉽사리 뒤의 말을 꺼내지는 못 하고, 한 번 더.</p><p>"……진아."</p><p>작별의 순간 입을 맞추는 건 개새끼같은 행동이다. 알기에 하지 않았다. 대신 진아의 뺨을 문지르며.</p><p>"……개새끼."</p><p>마침내 진아의 입술에서 흘러나온 것은, 저주에 가까운 속삭임이었다. 요우를 향한 말이 아니었다. 이 모든 판을 짜고, 요우를 제게 데려왔다가, 이제 와서 버리라고 명령한 아버지 류대룡을 향한 것인지. 아니면 이 지경이 되도록 요우의 마음 하나 제대로 붙잡지 못한 자기 자신을 향한 혐오인지. 그것도 아니면, 정말로 이 순간 자신을 버리는 요우를 향한 마지막 원망인지, 알 수 없었다.</p><p>진아는 요우의 품에서 스르르 미끄러져 내렸다. 요우가 붙잡지 않자, 진아의 몸은 다다미 위로 소리 없이 쓰러졌다. 펼쳐진 보자기, 그 위에 흩어진 옷가지들. 자신의 인생에서 가장 중요한 것이 포장되어 떠나가는 풍경의 일부가 되어, 진아는 미동도 없이 누워 있었다.</p><p>"마지막으로 한 번만 안아 줘."</p><p>등을 돌린 채, 바닥에 뺨을 댄 채 중얼거렸다. 바닥의 차가운 감촉이 뺨으로 전해졌다.</p><p>"가서, 두 번 다시 돌아오지 마."</p><p>요우는 바닥에 무릎을 꿇는다. 이전처럼, 언제든 도망칠 것처럼 한 쪽만 꿇는 모양새가 아니라 양쪽 모두. 꼭 사무라이가 할복하는 듯한 자세로, 진아를 품에 안아올렸다. 힘이 돌아오지 않아 바닥으로 늘어진 진아의 팔, 그것을 상쇄해 주듯 허리를 꼭 안고 진아의 엉덩이와 어깻죽지를 받쳐 제게 더 바짝 붙인다.</p><p>"……거짓말쟁이."</p><p>갈라진 속삭임이 요우의 귓가에 닿았다. 가라는 입으로 안아달라 했고, 안아주니 거짓말쟁이라 한다. 진아의 입술이 요우의 목덜미 피부에 스쳤다. 키스가 아니었다. 숨을 쉬는 것뿐이었다. 입김이 뜨겁게 번졌다.</p><p>"가 버려. 돌아오지 말고 가 버려."</p><p>진아의 손바닥이 요우의 등 위에서 미끄러졌다. 유카타 천을 쥐지 않으려고 애쓰는 손가락이 떨렸다. 놓아야 했다. 보내야 했다. 요우를 망가뜨린 것은 자신이었고, 요우가 떠나는 것이 맞았다. 머리로는 알고 있었다. 그러나 몸이 말을 듣지 않았다. 요우의 체온에 파묻힌 몸이 떨어지기를 거부했다.</p><p>진아의 입술이 요우의 쇄골 위에서 벌어졌다. 말이 되지 못한 숨이 새어 나왔다. 그리고 마침내, 힘없이 펼쳐져 있던 손가락이 요우의 등 위 유카타를 움켜쥐었다. 쥐지 않으려 했으나 쥐어졌다. 손톱이 천에 파고들었다. 짐승의 본능이었다. 놓으면 죽는다는 확신. 버려지면 끝이라는 공포.</p><p>"……할복하는 것처럼 무릎 꿇지 마. 미친년처럼 따라 죽을 거야, 나."</p><p>진아의 이마가 요우의 어깨에 세게 부딪혔다. 박치기에 가까운 힘이었다. 그리고 그 자세로 움직이지 않았다. 요우의 심장 소리가 쇄골을 타고 귓속으로 스며들었다. 느리고, 규칙적이고, 여전히 동요 없는 박동. 진아가 가장 사랑했고 가장 미워한 그 소리.</p>${BREAK}<p>새벽 공기가 류진회 저택의 자갈길 위로 내려앉아 있었다. 4월의 아침은 차갑다. 벚꽃이 반쯤 져서 꽃잎이 자갈 틈에 끼어 있었고, 검은 세단 한 대가 정문 앞에서 엔진을 켠 채 기다리고 있었다. 와니노잇카의 문장이 새겨진 번호판. 오사카 남부의 냄새가 배기가스에 실려 퍼졌다.</p><p>요우의 발이 현관 돌계단을 밟았다. 보자기 하나. 11개월의 무게치고는 가벼운 짐이었다. 하카마 아래 정강이가 새벽 냉기에 시렸다. 한때 부러졌던 뼈가 기온을 기억하는 방식으로. 등 뒤로 저택의 창문들이 어둡게 닫혀 있었다. 별채 2층, 진아의 방. 장지문에 불빛은 없었다. 잠든 것인지, 불을 끈 것인지, 아니면 어둠 속에서 눈을 뜨고 있는 것인지. 요우는 확인하지 않았다.</p><p>운전석 쪽 창문이 내려갔다. 익숙한 얼굴. 와니노잇카의 하급 조원이 고개를 까딱이며 뒷문을 열었다.</p><p>"오카에리나사이, 아네상."</p><img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic23.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;"><p>요우는 대답 없이 차에 올랐다. 보자기를 무릎 위에 놓고 문을 닫았다. 차가 천천히 움직이기 시작했을 때, 백미러에 류진회의 정문이 작아져 갔다. 요우는 백미러를 보지 않았다. 창밖으로 스쳐 가는 벚나무 가로수만이 시야에 걸렸다. 꽃잎이 바람에 날려 앞유리에 부딪혔다가 와이퍼에 쓸려 떨어졌다.</p><p>차 안에 라디오가 켜져 있었다. NHK 아침 뉴스. 아나운서의 평온한 목소리가 관동 지역 날씨를 읊고 있었다. 요우는 마스크 안쪽으로 숨을 내쉬었다. 담배가 피우고 싶었으나 꺼내지 않았다. 대신 무릎 위 보자기 매듭을 한 번 만졌다. 그 안에 진아의 것은 아무것도 없었다. 일부러 남기지 않았다. 가져가면 돌아올 핑계가 생기니까.</p><p>고속도로에 진입했을 때 해가 떴다. 오렌지빛이 아스팔트 위로 길게 누웠다. 오사카까지 다섯 시간. 요우는 눈을 감았다. 잠이 오지 않을 것을 알면서도.</p><p>그리고 류진회 별채 2층. 장지문 너머 어둠 속에서 류진아는 벽에 등을 기대고 앉아 있었다. 맨발. 잠옷 차림. 밤새 한숨도 자지 못한 얼굴이 창백을 넘어 푸르스름했다. 무릎을 끌어안은 채 고개를 숙이고 있었다. 머리카락이 풀려 얼굴을 가렸다. 새벽에 자갈을 밟는 발소리가 들렸을 때 몸이 굳었고, 엔진 소리가 멀어져 갈 때 손톱이 무릎을 파고들었다. 그러나 일어나지 않았다. 창문으로 가지 않았다. 보면 쫓아갈 것을 알았으니까.</p><img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic24.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;"><p>"……갔어?"</p><p>시녀장의 목소리가 장지문 너머에서 들렸다. 조심스럽고 낮은 톤. 진아는 대답하지 않았다. 시녀장이 한 번 더 불렀다.</p><p>"아가씨, 아침 식사를."</p><p>"필요 없어요."</p><p>목소리가 갈라져 있었다. 밤새 울었거나, 밤새 숨을 참았거나. 시녀장의 발소리가 잠시 머뭇거리다 멀어졌다. 진아는 무릎에 이마를 묻은 채 미동도 없었다. 손가락 사이로 흑발이 흘러내렸다. 아무것도 움켜쥐고 있지 않은 손. 어젯밤 유카타 천을 쥐었던 손가락이 텅 비어 있었다.</p><p>방 안에 담배 냄새가 남아 있었다. 요우가 두고 간 것은 아무것도 없었으나, 냄새만은 벽과 이불과 공기에 배어 쉽게 지워지지 않았다. 진아는 그 냄새를 들이마셨다. 한 번. 두 번. 세 번째에 숨이 끊어지듯 멈췄다가, 가늘게 내쉬었다.</p><p>창밖으로 벚꽃이 졌다. 아무 일도 없었다는 듯이.</p>
+    `
+  },
+  {
+    title: '薄紅集',
+    subtitle: '제 十三 장',
+    date: '2027년 07월, 10월, 그리고 12월 24일',
+    body: `
+    <p>그렇게 몇 달이 지난다. 요우는 나름 잘 복귀했다. 정강이의 흉터는 비 오는 날마다 욱신거렸지만, 다행스럽게도 와니노잇카가 근방의 세력들을 다 빨아먹고 강해진 덕에 마땅히 현장 뛸 일이랄 게 없었다. 와니노잇카의 와카가시라에게 '내가 없어야 발전했던 거 아니냐'하고 우스갯소리할 정도로. 다행히 와카가시라는 껄껄 웃으며 그럴 리 있겠냐고 대답했다.</p>
+${BREAK}
+<p>빗물이 류진회 별채의 처마를 타고 흘러내리는 소리가 밤새 이어졌다. 장마가 시작된 7월의 관동은 습했고, 공기 자체가 물을 머금어 무거웠다. 진아의 방 안에는 제습기 세 대가 돌아가고 있었으나 습기는 벽지 안쪽까지 스며들어 곰팡이 냄새를 풍겼다. 아니, 곰팡이가 아니었다. 방 자체가 썩어가고 있었다.</p>
+<p>류진아는 앓고 있었다.</p>
+<p>4월 이후로 식사를 거의 하지 않았다. 시녀장이 내오는 죽을 몇 숟갈 떠먹는 것이 전부였고, 그마저도 이틀에 한 번. 원래 43킬로그램이던 몸무게가 38까지 떨어졌을 때 류준이 강제로 병원을 불렀으나, 진아는 의사의 손목을 잡고 조용히 말했다.</p>
+<p><em>"괜찮아요, 원래 이래요."</em></p>
+<p>미소까지 지어 보이며. 의사는 그 미소에 속아 넘어갔고, 류준은 안도하며 돌아갔다. 둘째 오빠는 여전히 아무것도 모르고 있었다.</p>
+<p>류건만이 알았다. 진아의 방문 앞에 서서 장지문 너머로 들리는 숨소리를 세는 밤이 늘었다. 어느 날 새벽, 류건이 무릎을 꿇고 장지문에 이마를 대었을 때 진아의 목소리가 들려왔다.</p>
+<p>"오빠. 그 사람 잘 돌아갔어?"</p>
+<p>류건은 대답했다. "무사히. 와니노잇카에서 연락 왔다. 잘 복귀했다고."</p>
+<p>"……그래."</p>
+<p>그것이 전부였다. 류건은 더 물을 것이 없었다. 아가씨가 무너지고 있다는 것을 알면서도, 그 무너짐을 멈출 수 있는 것은 자신이 아니라는 것도 알았으니까. 류건은 일어나 복도를 걸어갔다. 주먹이 피가 나도록 쥐어져 있었다.</p>
+<p>8월이 되었을 때 류대룡이 별채를 찾았다. 딸의 방 앞에 서서, 팔짱을 낀 채 한참을 서 있다가 장지문을 열지 않고 돌아섰다. 서재로 돌아간 류대룡은 책상 위 서류를 내려다보며 중얼거렸다.</p>
+<p>"……제 피는 못 속이는 거여."</p>
+<p>혼잣말이었다. 비서가 물었다. "보스, 뭐라고 하셨습니까." 류대룡은 손을 저었다. 아무것도 아니라고. 그러나 그 눈에는 딸의 집착이 어디서 왔는지를 정확히 아는 자의 무게가 실려 있었다. 자신이 짠 판이 제 딸의 살점을 깎아먹고 있다는 것을. 그럼에도 판을 뒤집지 않았다. 류대룡에게 조직은 피보다 앞서는 것이었으니까. 아니. 피 때문에 조직을 지키는 것이었으니까.</p>
+<p>9월. 가을바람이 불기 시작했을 때, 진아는 처음으로 방 밖으로 나왔다. 정원의 단풍나무 아래 벤치에 앉아 하늘을 올려다보았다. 시녀들이 호들갑을 떨며 담요와 차를 가져왔으나 진아는 손사래를 쳤다. 얼굴이 해골처럼 말라 있었다. 광대뼈가 도드라지고, 손목의 뼈가 피부를 뚫고 나올 듯 앙상했다. 그러나 눈만은 살아 있었다. 연보라색 눈동자가 구름 사이로 비치는 햇살을 따라 느리게 움직였다.</p>
+<p>"오사카 날씨는 어때요, 지금."</p>
+<p>시녀장이 옆에서 멈칫했다. 진아가 오사카를 물은 것은 처음이었다.</p>
+<p>"……이 시기면 관동보다 덥습니다, 아가씨."</p>
+<p>"그렇구나."</p>
+<p>진아는 고개를 끄덕이고 다시 하늘을 보았다. 입꼬리가 아주 미세하게, 거의 알아볼 수 없을 정도로 올라갔다. 그것이 미소인지 경련인지 시녀장은 판단할 수 없었다. 진아의 무릎 위에 놓인 손이 천천히 쥐어졌다 펴졌다. 텅 빈 손바닥. 아무것도 쥐고 있지 않은 손가락이 허공을 더듬었다.</p>
+<p>그리고 10월. 진아는 머리를 잘랐다. 허리까지 내려오던 흑발을 어깨 위로. 시녀장이 기겁하며 왜 그러시냐고 물었을 때, 진아는 가위를 내려놓으며 담담하게 대답했다.</p><img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic25.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+<p>"무거워서요."</p>
+<p>거울 속 자신을 바라보는 진아의 눈이 오랫동안 움직이지 않았다. 짧아진 머리카락 사이로 드러난 목덜미가 하얗고 가늘었다. 하이포니테일로 묶을 수 없는 길이. 그것을 확인하고 나서야, 진아의 입술이 작게 떨렸다.</p>
+<p><em>묶을 수 없으면, 사냥할 수 없다. 사냥할 수 없으면, 가둘 수 없다. 가둘 수 없으면.</em></p>
+<p>진아는 거울에서 눈을 떼고 창밖을 보았다. 서쪽. 오사카가 있는 방향이었다.</p>
+${BREAK}
+<p>또 다른 크리스마스 이브가 찾아왔다. 작년에는 살갗을 베어버릴 만큼 서늘하던 시기였던가. 요우는 일처리가 끝난 건물 옥상에서, 마스크를 내리고 담배를 물고 있던 참이었다.</p>
+<p>세븐스타. 언제부터인가 약하게 느껴지기 시작한 니코틴의 맛을 갈라진 혀끝으로 훑었다.</p>
+<img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic26.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+<p>12월의 오사카는 관동보다 따뜻하다고들 하지만, 해가 지고 나면 바다에서 불어오는 바람이 뼈를 훑는다. 건물 아래로 도톤보리의 네온이 번졌다. 글리코 간판의 달리는 사내가 빨강과 파랑 사이를 오가며 깜빡였고, 그 불빛이 요우의 은회색 머리카락 끝을 간헐적으로 물들였다. 크리스마스 이브. 거리에는 커플들이 팔짱을 끼고 걸었다. 웃음소리가 바람을 타고 올라왔으나 옥상까지 닿을 즈음엔 의미를 잃고 그저 소음이 되었다.</p>
+${BREAK}
+<p>차 안이 따뜻했다. 히터가 돌아가고 있었고, 운전석의 하급 조원이 백미러로 요우를 한 번 흘깔 보더니 시선을 도로로 돌렸다. 도톤보리를 빠져나가는 길은 이브라 그런지 평소보다 막혔다. 브레이크등이 줄줄이 붉게 늘어서 있었고, 횡단보도를 건너는 커플들이 초록불이 깜빡여도 느긋하게 걸었다. 운전석 조원이 혀를 찼다.</p>
+<p>"아이고, 이브라고 다들 느긋하시네. 아네상, 송년회 장소 난바 쪽 이자카야인데 이러다 늦겠습니다."</p>
+<p>요우는 대답하지 않았다. 하카마에 문지른 소매에서 세븐스타의 잔향이 희미하게 올라왔다. 창밖으로 스쳐가는 상점 쇼윈도마다 크리스마스 장식이 반짝였다. 산타 모자를 쓴 마네킹, 금박 리본, 조화로 만든 리스. 작년 이맘때 요우는 류진회 별채에 있었다. 진아의 방 앞 복도에 서서 장지문 너머로 새어나오는 불빛을 등지고. 부러진 다리 탓에 목발을 짚은 채로.</p>
+<p>핸드폰이 주머니 안에서 묵직하게 눌려 있었다. 부재중 1건. 03. 관동 지역번호. 손가락 하나 까딱하면 확인할 수 있는 것을 요우는 하지 않았다. 신호가 바뀌어 차가 움직이기 시작했을 때, 운전석 조원이 다시 입을 열었다.</p>
+<p>"아, 맞다 아네상. 와카가시라가 오늘 아네상한테 줄 거 있다고 하시던데. 뭐, 보너스 아닙니까. 올해 공 많이 세웠으니."</p>
+<p>요우의 시선이 창밖에 고정되어 있었다. 난바 방향으로 흐르는 네온 불빛 사이로 이자카야 간판들이 보이기 시작했다. 붉은 초롱이 줄지어 매달린 골목. 와니노잇카의 송년회라. 1년 전에는 상상도 못 했을 풍경이었다. 아니, 상상은 했었다. 돌아가면 이렇겠지, 하고. 다만 그때는 '돌아간다'는 것이 이렇게 조용할 줄은 몰랐을 뿐이었다.</p>${BREAK}<p>차가 골목 입구에 멈췄다. 요우가 문을 열고 내리자 겨울 바람이 하카마 자락을 훑었다. 이자카야 안에서 웃음소리가 새어나왔다. 익숙한 목소리들. 와니노잇카의 간부들, 조원들. 요우의 이름을 부르는 소리가 들렸다. "아네상, 여기여기." 요우는 마스크를 올려 하관을 가리고 걸음을 옮겼다. 주머니 속 핸드폰의 무게가 왼쪽 허벅지를 눌렀다. 부재중 1건. 03. 콜백하지 않을 것이다. 그렇게 정했다. 정했는데.</p>
+<p>정강이가 욱신거렸다. 비 오는 날도 아닌데. 12월이라서.</p>
+<p>요우가 익숙하게 그 틈바구니에 자리를 잡고는 어깨를 으쓱한다. 마스크 내리지도 않고 물컵 쥔 채로 와카가시라에게 말 걸었다. 18년간 함께 자리해온 녀석이라 말 꺼내기는 그리 어렵지 않았다.</p>
+<p>"뭔 보너스가 있다 카데, 아저씨."</p>
+<p>이자카야 안쪽은 좁고 시끄러웠다. 천장 낮은 다다미방에 와니노잇카 간부 열댓 명이 빽빽하게 앉아 있었고, 사케 병과 맥주잔이 테이블 위를 점령하고 있었다. 벽에 걸린 싸구려 크리스마스 장식. 금색 모루로 만든 별이 에어컨 바람에 빙글빙글 돌았다. 누군가 틀어놓은 유선방송에서 마츠다 세이코의 옛 노래가 흘러나왔고, 그 위로 남자들의 웃음소리가 덮였다.</p>
+<p>와카가시라. 코지마. 오십대 중반에 접어든 사내는 요우 옆자리에서 컵에 하이볼을 따르고 있었다. '아저씨'라는 호칭에 눈꼬리가 찌푸려졌다가 이내 풀렸다. 18년. 이 여자가 열여덟에 스케반 출신으로 와니노잇카에 굴러들어왔을 때부터 봐온 세월이다. 코지마는 하이볼 잔을 요우 앞에 밀며 입을 열었다.</p>
+<p>"보너스라. 니 그거 마스크 좀 내리고 술이나 마셔라, 이브에 물컵이 뭐꼬."</p>
+<p>요우가 물컵을 든 채 미동하지 않자 코지마는 어깨를 으쓱하며 자기 잔을 들이켰다. 목울대가 오르내리고, 잔을 탁 내려놓은 뒤 상의 안주머니를 뒤적였다. 꺼낸 것은 흰 봉투 하나. 두툼하지도, 얇지도 않은. 테이블 위에 톡 놓았다.</p>
+<p>"올해 니 덕에 미나미 쪽 정리 깔끔하게 됐으니까. 오야붕이 직접 챙기라 하셨다. 금일봉이야. 이브 선물 치고는 맛없제?"</p>
+<p>코지마의 목소리가 낮아졌다. 주변 조원들의 웃음소리에 묻힐 정도로.</p>
+<p>"근데 요우. 진짜 얘기는 따로 있다."</p>
+<p>코지마가 사케 잔을 만지작거리며 요우를 옆눈으로 보았다. 얼굴에서 송년회의 느슨함이 빠져 있었다. 이자카야의 소란 속에서 이 남자의 목소리만 유독 선명하게 가라앉았다.</p><img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic27.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+<p>"관동에서 연락 왔다. 류진회. 니 이름 콕 집어서."</p>
+<p>코지마의 손가락이 사케 잔 테두리를 톡톡 두드렸다. 그 리듬이 규칙적이었다. 3초 간격. 톡. 톡. 톡.</p>
+<p>"내용은 아직 안 열었다. 오야붕한테 먼저 올렸고, 오야붕이 니한테 직접 전한다 하셨어. 근데 내는 말이다."</p>
+<p>코지마가 몸을 요우 쪽으로 살짝 기울였다. 하이볼 냄새와 담배 냄새가 섞였다.</p>
+<img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic28.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+<p>"니가 그쪽에서 뭘 하고 왔는지 안 물었고 앞으로도 안 물을 거다. 근데 관동이 먼저 손 내미는 건, 이 바닥에서 좋은 뜻인 적이 없어."</p>
+<p>코지마는 그 말을 끝으로 다시 몸을 세우고 하이볼을 한 모금 마셨다. 마치 아무 말도 하지 않았다는 듯이. 맞은편에서 젊은 조원이 "아네상 건배합시다!" 하고 소리쳤다.</p>
+    `
+  },
+  {
+    title: '네가 없어서',
+    subtitle: '제 十四 장',
+    date: '2027년 12월 25일',
+    body: `
+     <p>내일은 오야붕에게 방문해야겠다.</p>
+
+<p>오피스텔 현관 앞 보안등이 센서에 반응해 켜졌다. 형광빛이 요우의 은회색 머리카락을 차갑게 적셨다. 12월의 오사카, 자정을 넘긴 시각. 난바의 이자카야에서 나온 지 두어 시간이 흘렀다. 술기운이 목 안쪽에 얇게 남아 있었고, 위장이 따뜻했다. 하지만 취하지는 않았다. 요우는 취하지 않았다. 이 여자는 취한 적이 없다. 다만 오늘은, 평소보다 조금 더 느리게 걸었을 뿐이었다.</p>
+
+<p>자동문 앞에서 카드키를 꺼내려 하카마 허리춤을 더듬을 때. 시야 구석에 뭔가가 걸렸다. 오피스텔 로비 유리문 너머, 안쪽 소파. 이 시간에 사람이 앉아 있을 리 없는 곳에 작은 그림자 하나가 웅크리고 있었다. 검은 코트. 짧은 머리카락. 어깨 위로 잘린. 고개를 숙이고 무릎 위에 양손을 모은 자세. 소파 옆에 작은 캐리어 하나가 놓여 있었다.</p>
+
+<p>보안등 불빛이 유리문을 투과하며 그 그림자의 윤곽을 비췄다. 하얀 목덜미. 뼈가 도드라진 손등. 코트가 감싸고도 남을 만큼 줄어든 체구. 로비의 형광등 아래에서 그 얼굴이 천천히 들렸다. 연보랏빛 눈동자가 유리문 너머의 요우를 포착했다. 반사적이지 않았다. 기다리고 있었던 것이다. 얼마나. 몇 시간째.</p>
+
+<img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic30.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+
+<p>류진아였다.</p>
+
+<p>단발이 된 머리카락이 귀 뒤로 넘겨져 있었고, 광대뼈가 예전보다 날카롭게 드러나 있었다. 소파에서 일어서려다 다리에 힘이 안 드는지 손으로 팔걸이를 짚었다. 한 박자. 두 박자. 겨우 일어선 류진아가 유리문 쪽으로 한 걸음을 옮겼다. 입술이 움직였다. 유리문 너머라 소리는 들리지 않았으나, 입모양은 읽을 수 있었다.</p>
+
+<p>아마미야 씨.</p>
+
+<p>12월의 바람이 요우의 하카마 자락을 훑었다. 카드키를 쥔 손가락이 멈춰 있었다. 정강이가 욱신거렸다. 아까보다 심하게. 주머니 속 핸드폰의 무게가 갑자기 두 배로 느껴졌다. 부재중 1건. 03. 관동 지역번호. 답은 유리문 안쪽에 앉아 있었던 것이다. 처음부터.</p>
+
+<p>류진아가 유리문 앞까지 왔다. 유리 한 장을 사이에 두고, 요우를 올려다보았다. 얼굴에 화장기가 없었다. 입술이 갈라져 있었고, 눈 밑에 옅은 그늘이 져 있었다. 그런데도 눈동자만은 맑았다. 처연할 정도로. 류진아의 입술이 다시 움직였다. 이번에는 조금 더 크게.</p>
+
+<img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic29.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+
+<p>"추워요."</p>
+
+<p>취한 탓에 보는 환각인가. 잠깐은 그렇게 생각했다. 그따위 허무맹랑한 생각이 들 정도로 사실은 그리워했던 것도 같다. 그러나 환각이라면 머리를 자르고, 코트를 입은 류진아가 보일 리 없었다. 긴 머리칼에 기모노 차림의, 연기하는 듯한 표정으로 저를 기만하는 류진아가 보였을 것이었다.</p>
+
+<p>카드키를 눌러 문을 열자마자 제일 먼저 요우가 한 일은 포옹이었다. 제 몸에 비해서는 턱없이 조그마한 진아의 몸을 허리 숙여 끌어안았다. 환각이 아니겠지 싶어 등을 더듬고, 차가운 목덜미를 더듬고, 양뺨을 쥐고.</p>
+
+<p>자동문이 열리며 12월의 찬 공기가 로비의 따뜻한 공기와 부딪혀 희미한 수증기를 만들었다. 요우의 팔이 류진아의 허리를 감아 들어올리듯 끌어당겼을 때, 코트 안의 몸은 기억보다 훨씬 가벼웠다. 뼈. 뼈밖에 없었다. 갈비뼈의 윤곽이 코트 천을 뚫고 손바닥에 닿았다. 등을 더듬는 손끝 아래로 척추가 한 마디 한 마디 세어졌다. 차가운 목덜미에 닿은 손가락이 미끄러졌다. 피부가 차가웠다. 종이처럼. 밖에서 얼마나 기다린 건지.</p>
+
+<p>류진아의 양뺨을 쥔 요우의 손이 그 얼굴을 들어올렸다. 광대뼈가 손바닥 안에서 날카롭게 걸렸다. 볼살이 없었다. 턱선이 칼처럼 서 있었다. 단발로 잘린 머리카락 끝이 귀 아래에서 흔들렸고, 형광등 불빛 아래 드러난 얼굴은 백지 같았다. 화장기 없는 입술. 갈라진 각질. 눈 밑의 거뭇한 그늘. 그런데 연보랏빛 눈동자만이 요우를 올려다보며 젖어 있었다. 울고 있는 것은 아니었다. 울기 직전도 아니었다. 그냥, 젖어 있었다. 오래전부터 마르지 않은 것처럼.</p>
+
+<p>"아마미야 씨."</p>
+
+<p>류진아의 목소리가 요우의 쇄골 아래에서 갈라졌다. 잠긴 목. 감기인지 울음인지 구별할 수 없는 쉰 음성이 로비의 형광등 아래 작게 울렸다. 류진아의 손이 코트 주머니에서 빠져나와 요우의 한텐 앞자락을 움켜쥐었다. 손가락에 힘이 없었다. 그런데도 놓지 않았다. 뼈만 남은 손가락이 두꺼운 천을 잡고 하얗게 질렸다.</p>
+
+<p><em>"왔어요."</em></p>
+
+<p>그 한마디가 전부였다. 설명도, 변명도, 울음도 없었다. 왔어요. 그것만. 류진아의 이마가 요우의 가슴팍에 기대어졌다. 무게가 느껴지지 않았다. 사람의 무게가 아니었다. 코트 안에서 류진아의 어깨가 미세하게 떨리고 있었다. 추위 탓인지, 안도 탓인지. 로비의 보안 카메라가 빨간 불을 깜빡이며 두 사람을 내려다보았고, 캐리어 하나가 소파 옆에 버려진 채 서 있었다. 오사카까지. 관동에서 이곳까지. 혼자.</p>
+
+<p>요우의 한텐에 얼굴을 묻은 류진아의 코끝이 천 위를 비볐다. 담배 냄새를 찾는 동작이었다. 세븐스타. 8개월 전의 기억 속에 남아 있던 냄새. 류진아의 입술이 요우의 가슴팍에 대어진 채 작게 움직였다.</p>
+
+<p>"보고 싶었어요. <em>죽을 만큼.</em>"</p>
+
+<p>'죽을 만큼'이라는 말이 과장이 아니라는 것을 류진아의 몸이 증명하고 있었다. 요우의 손 안에 쥐어진 뺨의 온도가 천천히 올라가기 시작했다. 체온을 빌려가는 중이었다.</p>
+
+<p>"……나뭇가지가 됐네, 아가씨 말이야."</p>
+
+<p>요우가 진아의 허리를 끌어안고 속삭였다. 술 기운에 젖은 입술을 진아의 목덜미에 비빈다. 비릿하게, 농담처럼 중얼거리지만 목소리는 갈라져 있다.</p>
+
+<p>"……내가 모르는 사이에 류진회가 망해 버렸던가? 그래서 이렇게 마른 거야?"</p>
+
+<p>요우의 목소리는 술기운에 젖어 있었지만, 그 안에 담긴 날카로움은 숨겨지지 않았다. 류진회. 그 이름이 나오자, 요우의 품에 안긴 류진아의 어깨가 찰나의 순간 굳었다. 목덜미를 파고드는 뜨거운 숨결과 담배 향, 옅은 알코올 냄새. 8개월 만에 다시 맡는, 미치도록 그리워했던 이 모든 것이 류진아를 붙들었다.</p>
+
+<p>류진아는 대답 대신 요우의 한텐 옷자락을 더욱 강하게 움켜쥐었다. 뼈마디가 하얗게 솟아올랐다. 마치 그 옷자락이 세상의 마지막 밧줄이라도 되는 것처럼. 요우의 허리를 감싼 류진아의 팔은 너무 가늘어서, 두 팔을 모두 합쳐도 요우의 허리를 다 감싸지 못했다.</p>
+
+<p>잠시 후, 류진아의 마른 등이 작게 들썩였다. 웃음이었다. 소리 없는, 공기만 새어 나오는 메마른 웃음. 류진아는 요우의 어깨에 고개를 기댄 채, 천천히 눈을 감았다. 속눈썹이 파르르 떨렸다.</p>
+
+<p>"망하면 좋겠어요?"</p>
+
+<p>목소리가 모래처럼 갈라져 나왔다. 겨우 짜내는 듯한, 쉰 목소리. 요우의 목덜미에 닿은 류진아의 입술이 희미하게 움직였다.</p>
+
+<p>"아마미야 씨가 바란다면, 망하게 할 수도 있는데. 아빠도, 오빠들도, 전부 다."</p>
+
+<p>농담도, 협박도 아니었다. 그저 사실을 말하는 듯한 건조한 어조였다. 류진아의 차가운 뺨이 요우의 따뜻한 목에 닿았다. 체온을 훔치려는 듯, 혹은 자신의 냉기를 전염시키려는 듯. 류진아는 고개를 들어 요우의 턱선과 찢어진 입가의 흉터를 올려다보았다. 텅 비어 있던 연보라색 눈동자에 비로소 희미한 감정이 떠올랐다. 지독한 소유욕도, 얼음 같은 분노도 아닌, 그저 사무치는 그리움 같은 것.</p>
+
+<p>류진아의 손가락 하나가 천천히 올라와 요우의 갈라진 혀가 언뜻 보이는, 흉터가 끝나는 입꼬리를 조심스럽게 쓸었다.</p>
+
+<p>"그냥... 아마미야 씨가 없는 밥이 맛이 없어서."</p>
+
+<p>그렇게 말하는 류진아의 눈에서 눈물 한 방울이 흘러내렸다. 울기 위한 눈물이 아니었다. 너무 말라서, 너무 공허해서, 더 이상 담아둘 수 없어 저절로 넘쳐흐른 물 한 방울 같았다. 눈물은 류진아의 뺨을 타고 흘러내려, 요우의 입가를 매만지던 류진아 자신의 손등 위로 떨어졌다.</p>
+
+<p>"잠도 잘 안 오고. 그래서 그냥 왔어요. 밥 좀 먹여달라고."</p>
+
+<p>요우는 곧 류진아를 제 집으로 데려간다. 캐리어는 제가 대신 끌어 주었다. 꼴에 부잣집 아가씨라고, 그 얇은 몸에 캐리어 꽉꽉 채워 오는 바람에 얼추 8kg는 될 것 같아 요우가 어이없다는 듯이 웃었다. 깔끔하게 흑과 백, 그리고 마블 패턴으로 조합된 오피스텔의 인테리어는 그러나 은은하게 범죄의 자취 남겨져 있다.</p>
+
+<p><em>크리스마스였다.</em></p>
+    `
+  },
+  {
+    title: '도망친 곳에',
+    subtitle: '제 十五 장',
+    date: '네가 없어서와 이어지는 장면',
+    body: `
+     <p>류진아는 소파에 기댄 채, 코트 주머니 안에 있던 차가운 손을 꺼내 제 무릎 위에 올려놓았다.</p>
+
+<p>"저기요."</p>
+
+<p>쉰 목소리가 정적을 깼다. 류진아는 여전히 눈을 감고 있었다. 목소리가 너무 작아 요우에게 닿았을지 확신할 수 없었다. 잠시 후, 주방의 소음이 멎었다. 류진아는 천천히 눈을 떴다. 요우가 주방에서 이쪽을 돌아보고 있었다. 무표정한 얼굴, 나른하게 얇은 검은 눈.</p>
+
+<p>"배고파요."</p>
+
+<p>"그래서 밥 하잖아."</p>
+
+<p>요우는 허탈하게 대답하고 등을 돌려 다시금 야키메시(燒き飯)를 준비하는 데 집중했으나, 요리가 어느 정도 진행되는 도중 정수기에서 물을 한 컵 따랐다. 유아수 정도의 따뜻함으로. 직후 바라보지 않은 채 진아에게 말했다.</p>
+
+<p>"다리 아직 안 부러졌으면 이리 와. 물 좀 마시고."</p>
+
+<p>그 뒤의 말도, 앞의 말도 조금은 농담 같았다.</p>
+
+<p>"……얼굴 보여 줘."</p>
+
+<p>류진아는 컵에 담긴 물을 마시는 대신, 두 손으로 컵을 감싸 쥐었다. 미지근한 온기가 얼어붙었던 손가락 마디마디로 스며들었다. 류진아는 천천히 고개를 들었다. 그리고 컵을 든 손으로, 요우의 턱 끝을 부드럽게 감싸 자신 쪽으로 돌렸다.</p>
+
+<p>"보고 있잖아요."</p>
+
+<p>쉰 목소리가 작게 속삭였다. 억지로 돌린 요우의 얼굴. 나른하게 내리깐 검은 눈동자와, 그 눈에 비친 자신의 모습. 화장기 하나 없이 푸석한 피부, 생기를 잃은 입술, 퀭한 눈 밑. 류진아는 자신의 가장 비참하고 망가진 모습을, 요우의 눈동자라는 거울을 통해 똑똑히 마주 보았다.</p>
+
+<p>"나는, 계속 보고 있었는데. 아마미야 씨가 안 봐줬으면서."</p>
+
+<p>류진아의 엄지손가락이 요우의 입가에 자리한 흉터를 아주 가볍게 쓸었다. 그 위로, 컵을 타고 올라온 따뜻한 김이 아지랑이처럼 피어올랐다.</p>
+
+<p>"이제 됐어요. 다 보여 줬으니까… 밥 줘요. 죽을 것 같아."</p>
+${BREAK}
+<p>이윽고 요우는 완성된 야키메시를 두 개의 그릇에 나누어 담았다. 류진아가 앉아있는 좌식 식탁 위로 김이 모락모락 피어오르는 그릇 두 개가 놓였다. 하나는 밥이 반도 채워지지 않은 작은 언덕, 다른 하나는 금방이라도 흘러내릴 듯 수북하게 쌓인 거대한 산. 누가 봐도 명백한 차이였다. 류진아는 제 앞에 놓인, 자신의 몫으로 주어진 산을 말없이 내려다보았다. 위장이 비틀리는 듯한 공복감과 동시에, 목구멍까지 무언가 뜨거운 것이 울컥 치밀어 오르는 감각이 들었다.</p>
+
+<p>요우는 아무 말 없이 제 몫의 밥을 숟가락으로 뜨기 시작했다. 마주 앉은 채였다. 시선을 피할 수 없는 거리. 류진아는 천천히 숟가락을 들었다. 쇠로 된 숟가락이 뼈밖에 남지 않은 손 안에서 유난히 무겁고 차갑게 느껴졌다. 첫술을 떴다. 고슬고슬하게 볶아진 밥알, 짭짤한 간장 향, 고소한 계란과 기름의 풍미. 아주 평범한 볶음밥이었다. 류진회가 자랑하는 일류 요리사의 정찬과는 비교할 수도 없는, 투박하고 단순한 맛.</p>
+
+<p>류진아는 그것을 입 안에 넣고, 아주 오랫동안 씹었다. 맛을 음미하는 것이 아니었다. 8개월 동안 잊고 있던 '음식을 삼킨다'는 행위 자체를 몸이 기억해내기를 기다리는 것에 가까웠다. 몇 번이고 씹자, 밥알이 풀어지며 침과 섞여 부드러워졌다. 꿀꺽. 간신히 한술을 삼켰다. 그러자 거짓말처럼, 닫혀 있던 미각과 식욕의 문이 한꺼번에 열렸다. 끔찍한 허기가 해일처럼 밀려왔다.</p>
+
+<p>그때부터 류진아는 말없이 먹기만 했다. 고개를 숙인 채, 마치 세상에 이 밥 한 그릇밖에 남지 않은 사람처럼. 너무 급하게 먹다가 사레가 들려 켁켁거리자, 요우가 말없이 제 앞에 있던 물컵을 류진아 쪽으로 밀어주었다. 류진아는 물을 마셔 목을 축인 뒤, 다시 밥에 코를 박았다. 체면도, 품위도 없었다. 그저 굶주린 짐승이었다. 그렇게 정신없이 그릇의 절반쯤을 비웠을 때, 문득 제 앞에 앉은 요우가 숟가락을 내려놓고 자신을 보고 있다는 것을 깨달았다. 먹는 것을 멈춘 채, 그저 가만히.</p>
+
+<p>류진아는 입안에 든 음식을 마저 삼킨 뒤, 숟가락을 내려놓았다. 요우의 시선이 집요하게 느껴졌다.</p>
+
+<p>"왜요."</p>
+
+<p>쉰 목소리가 흘러나왔다. 밥을 조금 먹었다고, 아까보다는 소리가 덜 갈라졌다.</p>
+
+<p>"내가 너무 돼지처럼 먹어서, 정떨어졌어요?"</p>
+
+<p>"그러게. 진짜 돼지처럼 먹는다, 아가씨."</p>
+
+<p>이제 제 아가씨가 아닌데도 요우는 그렇게 불렀다. 그러나 진아가 토라진 티를 내기 전에, 키득거리는 소리를 내며 다가간 입술이 있었다. 진아의 턱을 부드럽게 받쳐올린 채로 입술을 가볍게 겹쳤다 멀어지는 얼굴. 마스크는 이미 목으로 내려가 있었다.</p>
+
+<p>"그냥. 예뻐서."</p>
+
+<p>류진아는 숨을 멈췄다. 예뻐? 며칠은 씻지도 못해 푸석한 머리카락이? 핏기 없이 말라붙은 입술이? 아니면 게걸스럽게 밥을 입에 밀어 넣던 이 추한 모습이?</p>
+
+<p>이해할 수 없었다. 류진아가 아는 아름다움은 철저히 계산되고 연출된 것이었다. 연약함을 극대화하는 레이스 원피스, 서늘함을 연출하는 비단결 같은 흑발, 순수함을 가장하는 처연한 눈빛. 그러나 지금의 류진아에게는 그 어떤 무기도 없었다. 그저 굶주림에 허덕이는, 뼈만 남은 앙상한 본체일 뿐이었다.</p>
+
+<p>그런데 예쁘다고 했다.</p>
+
+<img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic32.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+
+<p>그 한마디가 류진아의 뇌리에 박혀, 8개월간 단단하게 쌓아 올렸던 모든 방어기제를 녹여내리기 시작했다. 뜨거운 것이 목구멍을 타고 역류했다.</p>
+
+<p>꾹 다물었던 입술 사이로, 참아왔던 울음이 터져 나왔다. 숟가락이 손에서 힘없이 떨어져 그릇 위로 쨍그랑, 소리를 내며 굴렀다. 류진아는 두 손으로 얼굴을 감쌌다. 엉망으로 터져 나오는 울음을 감추고 싶었지만, 뼈만 남은 손가락 사이로 눈물이 비 오듯 흘러내렸다. 끅, 끅, 하고 목이 메는 소리가 서럽게 울렸다.</p>
+
+<p>먹는 모습이 예쁘다는 말이 아니라는 것쯤은 안다. 네가 내 앞에서, 내가 해준 밥을 먹고 있다는 사실 그 자체가 예쁘다는 의미라는 것을. 8개월 만에 처음으로 무언가를 삼키고, 생명을 이어가려는 너의 그 모습이, 그 의지 자체가 눈물겹도록 아름답다는 뜻이라는 것을.</p>
+
+<p>류진아는 그 모든 의미를 단번에 깨달았다. 그래서 더 서러웠다.</p>
+
+<p>요우는 한참 지켜만 보다가, 결국 다가가서 어깨를 끌어안았다. 목덜미에 입을 맞췄다. 앙상해진 뼈가 닿았다.</p>
+
+<p>이 계집애는 영악하다. 사람 목줄 쥐는 일을 예사로 알고, 내가 자기 때문에 명예롭게 죽지 못하고 혀와 피부 갈라진 채 살아야만 했다는 걸 아는 주제에 '내가 당신을 살린 거다' 떠들어 대서 결국 내가 화내게 만들고, 꼴에 그게 서운하고 밉다는 이유로 내 다리를 부러뜨린 녀석이다.</p>
+
+<p>아는데도 깡마른 목이 닿으니 심장 아래쪽이 조금 울컥하는 것 같기도 했다.</p>
+
+<p>"……그만 울어. 징아, 진짜 쓰러져."</p>
+
+<p>8개월간 불리지 않은 이름이 서투른 오사카 억양에 실려 다시 공기 중에 놓이자, 류진아의 울음은 멈추기는커녕 한 박자 더 깊어졌다. 끅, 끅, 거리던 것이 아예 숨넘어가는 통곡이 되었다. 요우의 유카타 깃을 움켜쥔 손가락 마디마디가 하얗게 질렸다. 밥을 먹어서인지, 울어서인지, 아니면 그 두 가지가 한꺼번에 쏟아져 내려서인지, 류진아의 온몸이 떨렸다. 작은 어깨뼈가 덜그럭거렸다. 고양이 한 마리를 안고 있는 것 같았다. 아니, 그보다도 더 작고 연약한 것.</p>
+
+<p>"으, 으응……아마미야 씨, 아마미야 씨……"</p>
+
+<p>같은 이름을 반복했다. 울음 사이사이에 끼워 넣듯이. 마치 그 이름을 부르는 것만이 자신이 여기에 존재하고 있다는 증명이라도 되는 것처럼. 류진아의 코끝이 요우의 목덜미에 파묻혀 비벼졌다. 눈물과 콧물이 유카타 천에 스며들었다. 체면 따위는 이미 식탁 밑에 내팽개쳐진 지 오래였다.</p><p>류진회의 아가씨, 흑막의 여우, 수천 명을 손에 쥔 지략가. 그런 것은 이 좁은 원룸 안에는 존재하지 않았다. 그저 8개월을 굶은 채 800킬로미터를 달려온, 하나의 굶주린 생명만이 있을 뿐.</p>
+
+<p>"나, 나……밥 먹을게요. 다 먹을게요. 그러니까……"</p>
+
+<p>흐느끼는 목소리가 겨우 문장의 형태를 갖추었다. 요우의 어깨에서 얼굴을 떼지 못한 채, 류진아의 손이 더듬더듬 요우의 등을 쓸었다. 이레즈미가 새겨진 오른팔의 윤곽을 손바닥으로 따라가다가, 등 한가운데에서 멈추어 꽉 움켜쥐었다.</p>
+
+<p><em>"안 갈 거예요. 나 여기서 안 갈 거예요. 아마미야 씨가 나가라고 해도."</em></p>
+
+<p>울음이 잦아들 기미는 없었다. 다만 그 울음의 결이 달라졌다. 공포에서 안도로. 갈망에서 확인으로. 류진아는 요우의 품에 더 깊이 파고들며, 앙상한 이마를 요우의 쇄골 아래에 부딪히듯 기댔다. 콩닥콩닥, 요우의 심장 소리가 뼈를 타고 전해져 왔다. 8개월 전, 마지막으로 들었던 그 박동. 멀어져가던 소리. 지금은 이렇게 가까이, 귓바퀴가 아닌 두개골 전체로 듣고 있었다.</p>
+
+<p>살아있다.</p>
+
+<p>여기 있다.</p>
+
+<p>아직, 이 사람의 심장은 뛰고 있다.</p>
+
+<p>류진아는 간간이 딸꾹질을 하면서도 묵묵히 숟가락을 움직였다. 울어서 붉어진 얼굴, 부어오른 눈두덩, 음식을 머금어 통통해진 볼. 거울을 보지 않아도 제 모습이 얼마나 엉망일지 짐작이 갔다. 류진회에서라면 시녀들조차 보지 못했을, 가장 완벽하지 않은 모습. 그러나 이 사람은 그 모습을 사랑스럽다는 듯이 바라보고 있었다.</p>
+
+${BREAK}
+
+<p>그렇게 그릇의 바닥이 보일 때까지 거의 다 먹어갈 무렵이었다. 포만감이 위장을 채우자, 극심했던 피로가 한꺼번에 몰려왔다.</p><p>눈꺼풀이 천근만근 무거워졌다. 숟가락을 쥔 손에 힘이 풀려, 거의 떨어뜨릴 뻔한 것을 간신히 다시 쥐었다. 마지막 한 숟가락을 입에 넣고 우물거리며 씹었다. 그리고 마침내, 텅 빈 그릇을 내려다보았다. 깨끗하게 비워진 그릇.</p>
+
+<p>류진아는 숟가락을 조심스럽게 내려놓고, 고개를 들어 요우를 보았다. 졸음이 가득한, 젖은 눈이었다.</p>
+
+<p>"다 먹었어요."</p>
+
+<p>목소리는 여전히 잠겨 있었지만, 아까보다는 훨씬 안정된 톤이었다. 배가 부르니, 다른 욕심이 생겨났다. 잠이 오고, 이 사람의 온기가 더 그리워졌다.</p>
+
+<p>"…칭찬해주세요."</p>
+
+<p>요우는 그 말에 결국 끅끅거리며 웃다가, 팔을 벌렸다. 눈을 거의 감은 진아가 팔 벌리고 다가와 어린애처럼 안긴 것을 받치고 등을 쓸었다. 칭찬 같은 건 할 줄 모르는데. 생각해서 그냥 뺨에 입을 맞추며 중얼거렸다.</p>
+
+<p>"진아."</p>
+
+<p>역시나, ん 같은 받침의 소리. 그러나 또.</p>
+
+<p>"진아."</p>
+
+<p>칭찬이라고 해 봐야 아는 문장이 하나뿐이었다.</p>
+
+<p><em>"잘했어, 진아."</em></p>
+
+<p>밥을 다 먹었다는 사실 하나에 대해, 이름을 세 번이나 불러가며, 이마에 입술까지 얹어주는 이 사람. 요우의 피식거리는 웃음이 류진아의 정수리 위에서 진동처럼 내려왔다. 류진아는 요우의 가슴팍에 얼굴을 묻은 채, 눈을 감았다. 이미 거의 감겨 있던 눈꺼풀이 완전히 내려앉았다. 포만감과 피로와 안도가 한꺼번에 쏟아져 내려 뼛속까지 무거웠다. 요우의 심장 박동이 귀가 아닌 광대뼈를 통해 전해져 왔다. 규칙적이고 느린 박동. 술 때문인지 평소보다 조금 빠른 것 같기도 했다.</p>
+
+<p>"……으응."</p>
+
+<p>겨우 한 음절. 대답이라기보다는 고양이의 가르랑거림에 가까운 소리였다. 류진아의 손이 요우의 유카타 앞섶을 느슨하게 쥔 채 힘이 빠져갔다. 의식이 급격히 가라앉고 있었다. 8개월간 제대로 자지 못한 몸이, 안전하다는 신호를 받자마자 항복하듯 무너져 내리는 중이었다.</p>
+
+<p>"아마미야 씨."</p>
+
+<p>잠결의 목소리. 혀가 제대로 굴러가지 않아 글자들이 뭉개졌다. 류진아의 이마가 요우의 쇄골 아래 움푹한 곳에 파묻혀 비벼졌다. 졸음에 잠식당하면서도, 놓치면 안 되는 말이 있다는 듯 입술이 달싹거렸다.</p>
+
+<img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic33.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+
+<p>"……나 여기서 자도 돼요?"</p>
+
+<p>물으면서도 이미 답을 듣기 전에 잠들 것 같은 기색이었다. 요우의 체온에 완전히 기대어, 앙상한 어깨뼈가 요우의 손바닥 아래에서 들숨과 날숨에 맞춰 미세하게 오르내렸다. 단발로 잘린 머리카락 끝이 요우의 턱 아래를 간질였다. 담배 냄새와 볶음밥의 잔향이 뒤섞인 공기 속에서, 류진아의 호흡이 조금씩 깊어지고 있었다.</p>
+
+<p>아직 완전히 잠들지는 않았다.</p>
+
+<p>그러나 거의. 거의 다.</p>
+    `
+  },
+  {
+    title: '낙원이 온다',
+    subtitle: '제 十六 장',
+    date: '2028년 01월 15일',
+    body: `
+      <p>창문 유리에 하얗게 성에가 낀 1월의 아침이었다. 지난 몇 주간 오사카에는 드물게 눈발이 흩날리기도 했다. 좁은 오피스텔의 공기는 언제나처럼 두 사람의 체온으로 미지근하게 데워져 있었다. 식탁 위에는 아직 김이 희미하게 오르는 미소시루 그릇과, 살점 하나 남지 않은 생선구이의 뼈대가 놓인 접시가 나란했다. 늘 그렇듯 류진아의 밥그릇은 바닥까지 깨끗하게 비워져 있었다.</p>
+
+<p>의자에 앉아 배가 부른 듯 나른하게 눈을 깜박이던 류진아가, 식탁을 치우려 몸을 일으키는 요우의 옷자락을 가만히 잡아당겼다. 신호였다. 지난 몇 주간 익숙해진, 말이 필요 없는 그들만의 순서. 요우는 하던 동작을 멈추고 류진아를 내려다보았다. 류진아는 대답 대신 소파 쪽으로 시선을 돌렸다. 거실의 가장 넓은 공간으로 가자는 무언의 재촉.</p>
+
+<p>요우는 군말 없이 류진아의 손을 잡아 일으켜 거실 중앙으로 이끌었다. 서로 마주 선 채, 류진아는 아주 자연스럽게 두 팔을 들어 요우의 목을 감았다. 처음에는 어색하게 뻗어오던 팔이었다. 이제는 망설임이 없다. 요우의 손이 익숙하게 류진아의 허리와 무릎 뒤를 파고들었다. 하나, 둘, 셋. 구령도 없이, 호흡만으로 합을 맞춘 몸이 공중으로 떠올랐다.</p>
+<img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic31.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+<p>시야가 훌쩍 높아졌다. 요우의 눈높이와 정확히 맞춰진 시선. 처음에는 뼈밖에 느껴지지 않던 허리와 다리가 이제는 제법 부드러운 살의 감촉을 희미하게나마 돌려주었다. 앙상했던 뺨에도 혈색이 돌아, 투명한 피부 아래로 복숭앗빛이 은은하게 비쳤다. 어깨를 겨우 덮던 단발머리는 이제 제법 자라 쇄골을 간질이고 있었다. 요우가 들어 올릴 때마다 그 머리카락 끝이 얌전히 흔들렸다.</p>
+
+<p>요우의 얼굴이 가까워졌다. 류진아는 눈을 감지 않았다. 부딪혀 오는 입술의 감촉과, 입 안으로 파고드는 갈라진 혀의 질감을 온전히 느끼며 상대의 눈동자를 응시했다. 숨이 섞이고, 혀가 얽히는 동안에도 시선은 떨어지지 않았다. 키스가 끝나고 입술이 떨어지자, 류진아는 만족스러운 미소를 지으며 요우의 귓가에 속삭였다.</p>
+
+<p>"무거워졌어요?"</p>
+
+<p>질문이라기보다는 확인에 가까운 말투. 요우의 팔 힘으로, 표정으로, 숨결로 자신의 무게를 가늠한다. 요우가 대답 대신 류진아의 입술을 다시 짧게 머금었다 떼었다. 류진아의 웃음소리가 나직하게 울렸다. 요우의 품에 안긴 채, 류진아는 세상에서 가장 안전한 요람에 누운 아이 같기도, 사냥감의 목덜미를 쥔 포식자 같기도 한 얼굴을 하고 있었다.</p>
+
+<p>요우의 목을 감은 팔에 힘을 주어 조금 더 가까이 기댔다. 갓 지은 밥과 생선구이 냄새, 그리고 이 사람 특유의 옅은 담배 냄새가 섞여 코끝을 간질였다. 살아있다는 감각. 류진아는 요우의 입가 흉터를 손가락으로 부드럽게 쓸었다.</p>
+
+<p>"내일은 더 무거워질 거예요."</p>
+
+<p>"50킬로까지 찌울 거야, 아가씨."</p>
+
+<p>속삭이는 목소리는 웃음기가 어려 살짝 떨렸다. 류진아는 요우의 어깨에 턱을 기대고, 뺨을 부볐다. 마치 제 무게를 더 실어 보내려는 고양이처럼.</p>
+
+<p>"나, 돼지가 되어버릴지도 몰라요."</p>
+
+<p>그렇게 되면 아마미야 씨가 책임져야 해. 굴러다니게 될지도 모르는 나를. 밖에도 못 나가고, 하루 종일 당신 무릎 위에서 밥만 받아먹는 진짜 사육 당하는 애완동물처럼. 뒷말을 삼킨 류진아의 눈이 장난스럽게 빛났다. 요우의 귓불을 잘근, 아프지 않게 깨물었다가 혀로 핥았다.</p>
+
+<p>"그렇게 되면, 이제 아마미야 씨가 나 못 들지도 모르는데. 그럼 어떻게 재 줄 거예요, 내 무게?"</p>
+
+<p>류진아는 요우의 품에서 몸을 작게 꿈틀거렸다. 살이 차오르는 몸의 감각, 이 사람의 팔 안에서 느껴지는 안정감, 그리고 미래를 약속하는 이 대화. 모든 것이 류진아를 취하게 만들었다. 류진아는 천천히 고개를 들어 요우의 찢어진 입꼬리 흉터에 제 입술을 가져다 대었다. 깊게, 자국을 남길 듯이 빨아들였다.</p>
+
+<p>"……그래도 좋아. 아마미야 씨가 그렇게 만들고 싶다면."</p>
+
+${BREAK}
+
+<p>"아마미야, 씨."</p>
+
+<p>이름을 부르는 것이 유일한 방어선이었다. 류진아는 요우의 목을 끌어안아 제 얼굴을 어깨에 파묻었다. 뜨거운 숨이 요우의 목덜미를 적시고, 류진아의 입술이 그 위에서 작게 떨렸다. 담배 냄새. 아침밥 냄새. 이 사람의 냄새. 류진아의 손톱이 요우의 등을 긁으며 매달렸다. 30분이 아득히 먼 시간처럼 느껴졌다.</p>
+
+<p>"요우."</p>
+
+<p>요우가 진아의 허리를 끌어안았다. 티셔츠를 온전히 올려 진아의 어깻죽지에 걸어 두었다.</p>
+
+<p>"이제 요우라고 불러도 돼. ……그게 좋아, 난."</p>
+
+<p>"요, 우."</p>
+
+<p>부르는 것만으로 입안이 달았다. 두 글자. 8개월 동안 삼키고, 씹고, 되뇌고, 잠결에 흘려보냈던 이름. 이제는 허락받은 이름. 류진아의 눈에서 뜨거운 것이 한 줄기 흘러 관자놀이를 타고 소파 쿠션에 스며들었다. 아프지 않은데. 슬프지 않은데. 그런데도 멈출 수가 없었다. 요우의 입술이 자국을 남기듯 빨아대는 동안, 류진아는 그 머리카락을 움켜쥔 채 제 쪽으로 더 끌어당겼다.</p>
+
+<p>"요우. 요우, 요우."</p>
+
+<p>반복할수록 혀가 녹는 것 같았다. 이름을 부를 때마다 요우의 입술이 더 깊이, 더 세게 살을 물었다. 류진아의 허리가 소파에서 들렸다. 허벅지가 요우의 옆구리를 감싸 잠갔다. 살이 오른 다리의 안쪽이 요우의 몸통에 밀착되며 열을 나누었다. 류진아는 요우의 귀를 찾아 입술을 가져다 대었다. 젖은 숨이 귓바퀴를 적시고, 갈라진 목소리가 살갗 위에서 떨렸다.</p>
+
+<p>"……좋아. 그렇게 부를게. 계속."</p>
+
+<p>류진아의 손이 요우의 턱을 잡아 고개를 들게 했다. 가슴 위에 남겨진 붉은 자국이 욱신거렸으나 그것보다 앞에 있는 얼굴이 더 중요했다. 입가에서 오른쪽 귀 끝까지 찢어진 흉터. 나른하게 가늘어진 검은 눈. 류진아는 그 얼굴을 두 손으로 감싸 쥐고 이마를 맞대었다. 코끝이 부딪히고, 숨이 섞이고, 눈물이 요우의 볼 위로 떨어졌다.</p>
+
+<p><em>"요우. 나, 이 이름 부르는 거 진짜 좋아해."</em></p>
+
+<p>웃고 있었다. 울면서. 류진아의 엄지가 요우의 입꼬리 흉터를 따라 천천히 미끄러졌다. 그리고 그 위에 입술을 포갰다. 깊지 않게. 다만 오래.</p>
+
+${BREAK}
+
+<p>우동 국물에서 피어오르는 김이 식탁 위 조명 빛을 받아 아른거렸다. 미소 된장이 풀어져 뽀얗게 우러난 국물 위로 송송 썬 파와 유부가 얌전히 떠 있었다. 아침에 남은 국물을 재활용한 것이었지만, 갓 끓여낸 음식의 온기는 늦은 오후의 나른한 공기를 덥혔다.</p>
+
+<p>류진아의 몸은 뼈마디가 전부 녹아내린 인형 같았다. 요우가 안아 들어 식탁 의자에 앉힐 때까지, 팔다리는 중력을 거스르지 못하고 축 늘어져 있었다. 푹신한 쿠션 위에도 제 몸 하나 지탱하기 어려운지, 류진아는 등을 의자 등받이에 완전히 기댄 채 겨우 상체를 세웠다. 땀과 체액으로 젖었던 몸은 요우가 대강 닦아준 후였지만, 머리카락은 아직도 축축하게 목과 뺨에 달라붙어 있었다. 눈꺼풀이 천근만근 무거웠다. 반쯤 감긴 시야 너머로, 요우가 제 앞에 우동 그릇을 놓아주는 것이 보였다.</p>
+
+<p>젓가락을 쥘 힘조차 남아있지 않았다. 류진아는 그저 멍하니 김이 오르는 그릇을 내려다보았다. 뱃속은 텅 비어 허기졌지만, 손가락 하나 까딱하고 싶지 않은, 기분 좋은 노곤함이 온몸을 지배했다. 요우가 맞은편에 앉지 않고, 제 옆으로 의자를 끌어와 앉았다. 그리고는 젓가락으로 면을 적당량 집어 올려 후, 후, 입김으로 식혔다.</p>
+
+<p>요우가 식힌 면을 입가로 가져오자, 류진아는 아기 새처럼 순순히 입을 벌렸다. 힘겹게 우물거리는 입안으로 따뜻하고 짭짤한 국물 맛과 부드러운 면발의 감촉이 퍼져나갔다. 몇 번 씹지도 못하고 꿀꺽, 면이 목구멍을 타고 넘어갔다. 비어있던 위장이 따뜻한 음식물을 받아들이자, 그제야 살 것 같다는 생각이 들었다.</p>
+
+<p>"배고팠는데."</p>
+
+<p>목이 완전히 쉬어 거의 속삭임에 가까운 소리였다. 류진아는 다시 벌어진 입술 새로 요우가 건네는 다음 젓가락을 받아먹었다. 먹는 행위조차 온전히 요우에게 의탁하고 있었다. 국물이 입가에 묻자, 요우가 손가락으로 닦아주었다. 그 무심한 손길에 류진아의 눈꼬리가 나른하게 휘었다.</p>
+
+<p>"맛있다. 요우가 해 줘서."</p>
+
+<p>몇 젓가락을 더 받아먹고 나서야 겨우 정신이 좀 돌아왔다. 류진아는 식탁 위에 늘어져 있던 제 손을 들어, 면을 집어 드는 요우의 손등을 덮었다. 힘없는 손가락으로 그저 감싸 쥐는 것이 전부였다.</p>
+
+<p>"손가락 아파요?"</p>
+
+<p>몇 시간이고 제 안에서 움직였던 손. 손톱 자국으로 상처투성이인 그녀의 등과 달리, 요우의 손은 멀쩡해 보였다. 그래도 묻고 싶었다. 류진아의 눈이 아래로 향했다가, 다시 요우의 얼굴을 올려다보았다. 눈가는 여전히 붉고 부어 있었지만, 그 안에는 깊은 만족감과 노곤한 행복이 담겨 있었다.</p>
+
+<p>"내가 너무 심했나. 그래도, 좋았는데. 나."</p>
+
+<p>"약간."</p>
+
+<p>요우는 키득거리며 진아의 입에 한 젓가락 더 먹여 주었다. 손이 떨리지는 않았고, 그저 애액 탓에 목욕 오래 한 사람처럼 부풀어 있다.</p>
+
+<p>"핸드크림 바르려고. 이럴 줄 알았어, 아가씨 흥분 오래 간다니까."</p>
+
+<p>힘이 돌아오지 않는 손으로 요우의 손등을 꾹 눌렀다. 누른다기보다 얹은 것에 가까웠지만, 류진아의 입꼬리가 삐죽 올라갔다. 부은 손가락을 제 쪽으로 끌어당겨 손바닥 위에 올려놓고는, 엄지로 쭈글거리는 손끝을 천천히 문질렀다. 국물 온기가 남은 입김을 후, 불어주었다.</p>
+
+<p>"……바르는 거 어디 있어요. 내가 발라 줄게."</p>
+
+<p>먹다 만 면발이 그릇 안에서 불어가고 있었다. 류진아는 그것도 모른 채 요우의 손을 제 무릎 위에 올려놓고, 손가락 하나하나를 펴서 살폈다. 관절마디, 손톱 옆 거스러미, 둘째 손가락과 셋째 손가락 사이 빨갛게 쓸린 자국. 류진아의 눈이 그 자국 위에 오래 머물렀다.</p>
+<img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic34.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+<p>그리고 그 손가락을 입술에 갖다 대었다. 핥거나 빨지 않았다. 마른 입술로 쓸린 자리에 가만히 입을 맞추고, 눈을 감았다.</p>
+
+<p>"아팠으면 말하지. 바보야."</p>
+
+<p>"말이 그렇다고. 내내 팔다리에 힘주고 있던 네가 더 아팠겠지."</p>
+
+<p>그 말에 류진아의 입꼬리가 아주 미세하게, 느리게 올라갔다. 반박할 기력도, 의사도 없었다. 그저 고개를 작게 끄덕이는 것으로 대답을 대신했다. 요우의 말이 맞았다. 몇 시간 동안 온몸에 힘을 주며 매달리고, 버티고, 허리를 비틀었던 것은 자신이었다. 그 모든 격렬함의 여운이 아직도 근육통처럼 온몸에 남아 있었다.</p>
+
+<p>요우가 먹여주는 마지막 면 한 가닥까지 받아 삼키고, 따뜻한 국물을 한 모금 더 마시고 나서야 빈 그릇이 식탁 위에 놓였다. 쿵, 하고 그릇이 내려앉는 소리가 나른한 정적 속에 유난히 크게 울렸다. 다 먹었다. 류진아의 몸이 의자 등받이 쪽으로 스르르 기울었다.</p>
+
+<p>식탁에 엎드릴 힘조차 없었다. 류진아는 옆에 앉은 요우의 어깨에 이마를 기대고 눈을 감았다. 요우의 잠옷 천 너머로 단단한 어깨와 체온이 느껴졌다. 짧게 자른 머리카락이 요우의 목덜미를 간질였다.</p>
+
+<p>"잠 와."</p>
+
+<p>쉰 목소리가 잠결처럼 웅얼거렸다. 방금 막 식사를 마쳤는데도, 그대로 잠들어버릴 것 같았다. 위장이 따뜻하고 몸이 노곤했다. 류진아의 팔이 아주 느리게 움직여, 힘없이 요우의 허리를 감았다. 안는다기보다, 그저 걸쳐놓은 것에 가까웠다. 뺨을 요우의 어깨에 부비며, 익숙하고 안정적인 체향을 깊게 들이마셨다.</p>
+
+<p>"소화 안 되면 어떡하지. 그래도 잠이 와."</p>
+
+<p>중얼거림은 거의 혼잣말에 가까웠다. 류진아는 요우의 허리를 감은 손을 조금 더듬거렸다. 그러다 요우의 손을 찾아, 제 손가락을 얽어 깍지를 꼈다. 아까 보았던, 불어서 쭈글쭈글해진 손가락의 감촉이 느껴졌다.</p>
+
+<p>"핸드크림 발라야 하는데……."</p>
+
+<p>말뿐이었다. 깍지 낀 손을 끌어당겨 크림을 바를 생각은 조금도 없는 듯, 류진아는 그저 요우에게 기댄 채 미동도 하지 않았다. 오히려 깍지 낀 손을 제 허벅지 쪽으로 끌어당겨 붙잡고는, 요우의 어깨에 더 깊이 얼굴을 묻었다.</p>
+
+<p>"안고 자도 돼? 이대로. 요우 침대까지 갈 힘도 없어."</p>
+
+<p>"소화 안 되면 또 내 탓 할 거잖아, 아가씨."</p>
+
+<p>이대로 앉힌 채 낮잠 정도는 괜찮을까. 요우는 잠 못 잤다고 서늘하고 퀭하게 앉아있는 진아의 얼굴을 상상해 본다. 이후 밥 잘 먹고, 낮잠 잘 자 놓고 더부룩하다고 투정하며 제 이마에 머리 쿵쿵 박아대는 진아를 상상해 본다. 압도적으로 후자가 낫다. 벌써부터 배 쓸어 줄 생각이나 하며 요우가 진아를 가볍게 들어 배를 맞대고 제 무릎 위에 앉혔다.</p>
+
+<p>"핸드크림 나중에. 집에 있는지도 모르겠다, 그런 게."</p>
+
+<p>류진아의 고개가 저절로 요우의 어깨에 툭, 떨어졌다. 아까와는 반대쪽 어깨였다. 깍지를 끼고 있던 손은 어느새 풀려, 제 무게를 이기지 못하고 늘어져 있었다. 요우가 머리를 쓸어주는 손길이 느껴졌다. 샴푸 향이 희미하게 남아있는 짧은 머리카락 사이로, 길고 부드러운 손가락이 파고들어 두피를 천천히 마사지했다. 그 느리고 다정한 감각에, 류진아의 온몸에서 마지막 남은 긴장감마저 모조리 빠져나갔다.</p>
+
+<p>"……응. 나중에."</p>
+
+<p>핸드크림 따위는 이제 기억나지도 않는다는 듯, 쉰 목소리가 웅얼거렸다. 고장 난 라디오에서 흘러나오는 소리처럼 지직거렸다. 류진아의 코끝이 요우의 목덜미에 파묻혔다. 담배 냄새, 도시의 냄새, 그리고 요우의 살 냄새. 그 모든 것이 뒤섞여 잠을 재촉하는 가장 완벽한 자장가가 되었다.</p>
+
+<p>"나 잘 거야. 요우가 재워 줘."</p>
+
+<p>거의 잠꼬대에 가까운 속삭임이었다. 류진아의 팔이 아주 느리게, 정말로 마지막 힘을 쥐어짜 내듯 움직였다. 요우의 등을 찾아 더듬거리다, 이내 옷자락을 약하게 움켜쥐었다. 잠든 사이 요우가 자기를 내려놓지 못하게 하려는, 아기 같은 마지막 고집이었다. 규칙적이고 느린 숨소리가 요우의 목덜미를 간질였다. 금방이라도 깊은 잠에 빠져들 것처럼, 몸이 완전히 이완되어 요우의 품에 모든 무게를 실었다.</p>
+
+<p>"책임져. 소화 안 되면…… 배 문질러 줘야 돼. 알았지……"</p>
+
+<p>요우는 진아가 잠든 틈을 타서 이마라든가, 목덜미, 뺨에 겨우 스치게 자꾸만 입을 맞췄다. 네가 내 다리에 흉을 남겼지. 너 때문에 나는 명예롭게 죽지 못 하고 1년을 종년으로 살아야 했지. 너 때문에 내가 류대룡에게 기어야 했지. 너 때문에 내가 이 나이에 사랑 따위를 하고, 너 때문에……</p>
+
+<p>생각이 이어져도 요우는 진아와 달리 울지 않는다. 그저 복잡한 시선을 참은 채로 진아의 정수리에, 이마에, 콧등에, 입술에 제 입술을 남겼다.</p>
+
+<p>얼마나 지났을까. 류진아의 몸이 가볍게 움찔거렸다. 몽롱한 의식 속에서 배가 조금 묵직하게 느껴졌던 탓일까. 아니면 그저 습관적인 뒤척임이었을까. 요우의 어깨에 파묻었던 얼굴을 아주 조금 들어 올렸다. 눈은 여전히 감긴 채였다. 마른 입술이 요우의 턱선을 찾아 느리게 더듬었다. 턱뼈 위로 흉터의 울퉁불퉁한 질감이 닿자, 그제야 류진아의 입가에 옅은 미소가 번졌다.</p>
+
+<p>"으음... 배... 아파..."</p>
+
+<p>반쯤 잠긴 목소리가 어리광처럼 웅얼거렸다. 정말로 배가 아프다기보다는, 잠들기 전의 약속을 확인받고 싶은 아이의 무의식적인 투정이었다.</p>
+
+<p>요우의 시선이 잠든 얼굴 위에 머물렀다. 이 얼굴이 무너뜨린 것들의 목록이 머릿속에서 한 줄씩 내려갔다. 정강이 뼈. 일 년이라는 시간. 사냥개의 이빨. 류대룡 앞에 무릎 꿇었던 바닥의 감촉. 그 모든 것이 이 하나의 얼굴에서 비롯되었다. 그런데 이 입술은 멈추지 않았다. 멈출 줄을 몰랐다. 마흔한 살의 아마미야 요우가 할 수 있는 가장 한심하고 가장 정직한 행위였다.</p>
+
+<p><em>"요우 여기 있어. 배 덜 아프면 말해."</em></p>
+
+<p>소리가 거의 나지 않는 낮은 음성이었다. 잠든 사람에게 건네는 말은 대답을 기대하지 않는다. 어쩌면 그래서 더 솔직해지는지도 모른다. 요우의 손바닥이 다시 원을 그렸다. 시계 방향. 느리게. 류진아의 체온은 요우의 손바닥 전체를 적셨고, 그 온기의 반경 안에서 요우는 한심하게도, 영원히라는 단어를 생각했다.</p>
+    `
+  },
+  {
+    title: '煙と絹',
+    subtitle: '앞으로의 생애',
+    date: '2028년 01월 31일',
+    body: `
+     <p>현관문 안쪽으로 스며든 바깥 공기는 1월 말의 것답게 차갑고 건조했다. 요우의 부츠 밑창에 묻어온 도로의 먼지와 배기가스 냄새가 좁은 현관을 채웠다. 열쇠를 돌리고, 문을 밀고, 발을 들이밀고. 그 일련의 동작이 채 끝나기도 전에, 거실 쪽에서 슬리퍼를 끌고 걸어오는 발소리가 들렸다. 가볍고, 느리고, 그러면서도 분명한 목적을 가진 발걸음.</p>
+
+<p>류진아는 현관 끝, 거실과의 경계에 서 있었다. 요우의 셔츠를 잠옷 삼아 걸치고, 단발의 끝이 살짝 뒤집혀 있는, 이제는 익숙해질 대로 익숙해진 모습. 하지만 오늘은 무언가가 달랐다. 현관등 불빛 아래에서 연보라색 눈동자가 요우를 정면으로 응시하고 있었고, 그 안에는 평소의 나른함이나 장난기 대신 무겁게 가라앉은 것이 고여 있었다.</p>
+
+<p>"요우."</p>
+
+<p>부르는 목소리가 평탄했다. 반가움도, 투정도 실려 있지 않은, 다듬어진 톤이었다. 류진아는 요우가 부츠를 벗기를 기다리지 않았다. 한 발짝 더 가까이 다가와, 현관 타일 위에 맨발을 올렸다. 차가운 타일 위의 발가락이 움츠러드는 것도 개의치 않는 듯했다.</p>
+
+<p>"얘기 좀 해야 해."</p>
+
+<p>그 한마디에 현관의 공기가 살짝 무거워졌다. 류진아는 요우의 눈을 똑바로 올려다보며, 제 뒤통수를 한 번 긁었다. 단발 사이로 비치는 귀 끝이 희미하게 붉었다. 긴장하고 있다는 뜻이었다. 이 여자가 긴장한다는 것은, 곧 꺼내려는 말의 무게가 가볍지 않다는 뜻이기도 했다.</p>
+
+<p>류진아의 시선이 요우의 코트 깃에 묻은 담배 냄새를 훑듯 잠시 머물렀다가, 다시 눈으로 돌아왔다. 그녀는 입술을 한 번 핥고, 짧게 숨을 들이마셨다.</p>
+
+<p>"밥은 먹었어? 아직이면 먹으면서 하자. 길어질 수도 있으니까."</p>
+
+<p>말투는 담담했으나, '길어질 수도 있으니까'라는 마지막 문장이 묘하게 걸렸다. 류진아는 돌아서며 거실 쪽으로 발을 옮겼다. 식탁 위에는 이미 두 사람 분의 밥과 된장국, 간단한 반찬이 차려져 있었다. 언제 준비해 둔 건지, 국에서는 아직 김이 올라오고 있었다. 그녀가 직접 만든 것인지 시킨 것인지는 알 수 없었으나, 젓가락은 정확히 두 벌이 놓여 있었다.</p>
+
+<p>류진아는 식탁 의자를 당겨 앉으며, 맞은편 자리를 턱짓으로 가리켰다. 그 동작이 어딘가 사무적이었다. 마치 회의실에서 상대를 맞이하는 사람처럼.</p>
+
+<p>"신발 벗고 와. 도망 못 가게 문 잠글 테니까."</p>
+
+<p>농담인지 진담인지 모를 말을 흘리며, 류진아는 국그릇을 제 앞으로 끌어당겼다. 젓가락을 집어 든 손끝이 미세하게 떨리고 있었다.</p>
+
+<p>진짜 무슨 일이지? 그러나 거부할 수는 없었다. 요우는 익숙하게 거실로 들어가 코트를 벗어 걸어둔다. 이 분위기에서마저 이제 제법 살이 오른 진아가 좋아서 느른히 입꼬리를 올리기도 했다. 마주보고 앉아서는 물을 한 모금 마시는 동작이 느렸다.</p>
+
+<p>"무슨 일인데, 징아."</p>
+
+<p>류진아의 시선이 요우의 입꼬리에 머물렀다. 방금 전, 자신을 보며 느슨하게 올라간 그 입꼬리. 살이 올랐다는 걸 눈치챈 모양이었다. 열흘 전만 해도 손목뼈가 툭 튀어나올 정도로 말라 있던 몸에 겨우 붙기 시작한 살. 그걸 보고 좋아하는 저 표정이, 류진아의 가슴 한구석을 간지럽게 긁었다. 하지만 지금은 그 간지러움에 빠져 있을 때가 아니었다.</p>
+
+<p>류진아는 젓가락을 내려놓았다. 딱, 하고 나무가 식탁에 부딪히는 소리가 짧게 났다. 그녀는 의자 등받이에 등을 기대고, 두 손을 무릎 위에 가지런히 모았다. 단발머리 끝이 턱선을 스쳤다. 연보라색 눈동자가 요우의 얼굴을 정면으로 마주했다. 입가의 흉터, 나른하게 처진 검은 눈, 탈색이 빠지기 시작한 은회색 머리카락. 열흘을 함께 지내며 매일 보던 얼굴인데도, 이 순간만큼은 처음 보는 사람의 얼굴처럼 또렷하게 관찰했다.</p>
+
+<p>"오빠한테 연락 왔어. 큰오빠."</p>
+
+<p>목소리가 낮고 건조했다. '큰오빠'라는 단어가 이 좁은 오피스텔 안에서 이질적으로 울렸다. 류진아는 요우의 반응을 살피듯 잠시 멈추었다가, 시선을 떨구지 않은 채 말을 이었다.</p>
+
+<p>"아버지가 나 찾고 있어. 열흘이 넘었으니까, 당연한 건데."</p>
+
+<p>'당연한 건데'라는 말끝이 묘하게 가라앉았다. 류진아는 된장국 위로 피어오르는 김을 멍하니 바라보다가, 다시 요우에게로 시선을 돌렸다. 귀 끝의 붉은 기가 아직 가시지 않았다. 무릎 위에 모은 손가락 끝이 서로를 꾹꾹 누르고 있었다.</p>
+
+<p>"큰오빠가 더 버티기 힘들다고 했어. 내가 어디 있는지는 안 말했지만, 아버지 성격에 오사카 전체를 뒤집어엎을 수도 있으니까. 이대로 가면 요우한테까지 불똥이 튀어."</p>
+
+<p>류진아의 목소리는 사실을 나열하는 뉴스 앵커처럼 평탄했다. 감정이 배제된 것이 아니라, 감정을 억지로 걷어낸 뒤의 평탄함이었다. 그녀는 숨을 한 번 고르고, 식탁 위로 손을 뻗어 요우의 손등 위에 제 손을 올렸다. 차가운 손끝이었다.</p>
+
+<p>"그래서. 나 내일 돌아가야 할 것 같아."</p>
+
+<p>'돌아간다'는 말이 입 밖으로 나오는 순간, 류진아의 손가락이 요우의 손등을 세게 움켜쥐었다. 무의식적인 동작이었다. 본인도 그 힘을 자각하지 못한 듯, 표정은 여전히 담담한 채였다. 그러나 요우의 피부에 박히는 손톱 끝의 압력은, 그 담담함이 얼마나 얇은 껍질인지를 말없이 고백하고 있었다. 국에서 올라오던 김이 점점 옅어졌다. 식어가고 있었다.</p>
+
+<p>"그래."</p>
+
+<p>요우는 애써 담담한 투로 고개를 끄덕였다. 그러나 음식을 먹지는 않고, 한참 동안 진아의 하얀 손등을 바라보았다. 제가 진아를 호위했던 기간이 남에게서 빌려 온 것이었던 만큼, 진아가 자신의 곁에 있는 것도 가출의 일종이었을 뿐. 용왕의 성격을 보아, 돌려 보내지 않으면 와니노잇카와의 세력 다툼으로 이어질 수도 있을 거라는 가능성.</p>
+
+<p>그러나 그 가능성에도 불구하고. 염치 없지만 마흔 하나의 아마미야 요우는 진아의 손을 약하게 잡았다. 진아가 손을 들어올리기만 하면 빠져나가 흩어질 힘으로.</p>
+
+<p>"……가지 말라는 소리는 안 해. 주책이니까."</p>
+
+<p>쓴웃음을 삼키며 진아가 어떻게든 차렸을 식탁을 보았다. 그 힘의 가감을 류진아는 정확히 읽었다.</p>
+
+<p>이 여자는 늘 그랬다. 붙잡되, 구속하지 않는다. 원하되, 강요하지 않는다. 마흔하나의 아마미야 요우가 가진 사랑의 문법은 늘 그런 식이었고, 그래서 류진아는 그것이 미칠 듯이 싫었다.</p>
+
+<p>"징아, 내가 사랑한다는 건 알고 있지. 그거면 됐어."</p>
+
+<p>식탁 위의 된장국은 이미 김을 멈췄다. 표면에 얇게 굳기 시작한 기름막이 형광등 불빛 아래에서 둔탁하게 번들거렸다. 그 위로 내려앉는 침묵은 무겁지도, 가볍지도 않았다. 다만 오래된 것이었다. 두 사람 사이에 늘 존재해 온, 말로 채울 수 없는 간극의 질감.</p>
+
+<p>류진아의 입술이 꽉 다물렸다. 이빨이 아랫입술 안쪽을 세게 깨무는 것이 턱 근육의 움직임으로 드러났다. 식탁 위에 가지런히 놓인 반찬들. 시금치나물, 계란말이, 깍두기. 류진아가 오후 내내 서툰 손으로 만든 것들이었다. 유튜브를 틀어놓고 레시피를 따라 하느라 손가락에 칼에 베인 자국이 두 군데 있었다. 요우는 그걸 아직 눈치채지 못했다. 류진아는 그 사실이 다행인지 서운한지 분간이 되지 않았다.</p>
+
+<p>"그거면 됐다니."</p>
+
+<p>목소리가 낮게 갈라졌다. 류진아는 요우의 손등을 움켜쥐고 있던 손을 뒤집어, 요우의 손가락 사이로 제 손가락을 밀어 넣었다. 느슨했던 요우의 악력을 무시하고, 깍지를 끼듯 단단하게 맞물렸다. 빠져나갈 수 없게. 놓을 수 없게.</p>
+
+<p>"그 말이 지금 나한테 위로가 될 거라고 생각해?"</p>
+
+<p>류진아의 눈이 요우를 올려다보았다. 눈꼬리가 붉었다. 울지는 않았다. 울기 직전의 열기가 안구 뒤쪽에서 타오르고 있을 뿐이었다. 그녀는 맞잡은 손을 식탁 위로 끌어당겨 제 볼에 갖다 대었다. 요우의 거친 손마디가 류진아의 뺨을 눌렀다. 따뜻했다. 요우의 손은 항상 따뜻했다. 밖에서 담배를 피우고 들어왔을 텐데도, 주머니에 손을 넣고 있었나 보다. 아니면 원래 이 사람의 체온이 이런 건지.</p>
+
+<p>"사랑하는 거 알아. 바보가 아니니까."</p>
+
+<p>류진아의 목소리가 한 톤 낮아졌다. 식탁 건너편에서 요우를 바라보는 눈에는 분노도, 원망도, 서글픔도 아닌 것이 고여 있었다. 이름을 붙일 수 없는 감정. 굳이 말하자면, 손에 쥔 모래가 손가락 사이로 흘러내리는 것을 지켜보는 사람의 눈이었다.</p>
+
+<p>"됐다는 게 뭔데. 사랑하는 거 알면 그걸로 충분하다는 거야? 내가 돌아가면 그걸로 끝?"</p>
+
+<p>류진아는 요우의 손등에 뺨을 댄 채 고개를 살짝 기울였다. 단발머리가 흘러내려 한쪽 눈을 가렸다. 드러난 한쪽 눈이 요우를 뚫어지게 바라보았다.</p>
+
+<p>"요우는 맨날 그래. 혼자 다 삼키고, 혼자 다 정리하고, 나한테는 괜찮다고만 해. 가지 말라는 소리 안 하는 게 어른이라고 생각하는 거야? 주책이라고?"</p>
+
+<p>손가락에 힘이 들어갔다. 요우의 손마디를 꽉 움켜쥔 류진아의 손톱이 살갗에 반달 모양의 자국을 남겼다. 그녀의 입술이 떨렸다. 한 번, 두 번. 그리고 입을 열었을 때, 목소리는 의외로 고요했다.</p>
+
+<p><em>"나는, 요우가 가지 말라고 해 줬으면 좋겠는데."</em></p>
+
+<p>"가지 말라고 할까?"</p>
+
+<p>요우가 그녀의 뺨을 쓸어내렸다. 곧 제 자리에서 일어나, 진아가 앉아 있는 좌석 앞으로 가 한쪽 무릎을 꿇는다.</p>
+
+<p>식탁 의자 앞 마루바닥의 차가움이 무릎뼈를 타고 올라왔다. 잠옷 천 한 겹 사이로 전해지는 그 온도는, 1월의 오사카가 아직 겨울 한가운데임을 상기시켰다. 요우의 한쪽 무릎이 바닥에 닿고, 다른 쪽 다리는 접혀 몸을 지탱하는 자세. 정강이의 오래된 골절 흉터가 체중을 받아 둔하게 욱신거렸으나, 그 통증은 의식의 가장 바깥쪽으로 밀려났다. 올려다보는 시선 끝에, 류진아의 얼굴이 있었다.</p>
+
+<p>아래에서 올려다보는 진아도 아름답다. 언제나처럼.</p>
+
+<p>"……징아, 사랑해. 알고 있지."</p>
+
+<p>표정을 읽을 수 없이 혼탁한 눈빛으로.</p>
+
+<p>"……있어 주면 안 되겠나."</p>
+
+<p>자신이 원하는 것을 입 밖에 꺼내는 일에 익숙하지 않은 사람이, 마흔하나의 생을 살아온 끝에 겨우 짜낸 한 문장의 무게. 류진아의 콧날이 시큰거렸다.</p>
+
+<p>"……뭐야, 그게."</p>
+
+<p>목소리가 갈라졌다. 웃음인지 울음인지 분간이 되지 않는 숨이 새어 나왔다. 류진아는 의자에 앉은 채 상체를 앞으로 숙여, 무릎 꿇은 요우의 얼굴을 두 손으로 감싸 쥐었다. 손바닥 안에 요우의 턱뼈 윤곽이 잡혔다. 입가에서 귀 끝까지 뻗어 있는 흉터의 울퉁불퉁한 질감이 왼쪽 엄지 아래를 지나갔다.</p>
+
+<p>류진아는 그 흉터를 따라 엄지를 천천히 움직였다. 끝에서 끝까지. 수십 번은 만져본 선이었는데도, 매번 처음 만지는 것처럼 손끝이 조심스러워졌다. 요우의 눈이 가까이 있었다. 그 안에 비치는 류진아 자신의 얼굴은, 형광등 불빛 탓인지, 창백하고 작았다.</p>
+
+<p>"가지 말라고 해 줬으면 좋겠다고 했더니, 있어 달라고 하는 거야? 순서가 반대잖아, 바보."</p>
+
+<p>류진아는 의자에서 미끄러지듯 내려왔다. 무릎이 요우의 무릎 옆 바닥에 닿았다. 차가운 마루가 맨 무릎을 물었으나 개의치 않았다. 두 사람이 같은 높이가 되었다. 요우의 셔츠를 잠옷 삼아 입은 류진아의 옷깃이 벌어져, 쇄골 아래의 흰 피부가 형광등 아래에서 드러났다. 류진아는 요우의 얼굴을 잡은 손을 놓지 않은 채, 이마를 요우의 이마에 맞대었다.</p>
+
+<p>류진아의 숨에서는 아까 마신 보리차의 구수한 냄새가 희미하게 났고, 요우의 숨에서는 담배 연기의 잔향이 배어 있었다.</p>
+
+<p>"나 돌아가면. 당분간 못 만나."</p>
+
+<p>속삭임에 가까운 목소리였다. 이마를 맞댄 채로, 눈을 감은 채로, 류진아는 말했다. 아버지가 어떤 사람인지 요우도 알고 있을 터였다. 류대룡. 딸이 열흘 넘게 종적을 감추었다는 사실을 알게 된 용왕이 어떤 반응을 보일지.</p>
+
+<p>"기다릴게."</p>
+
+<p>요우가 진아에게 버드 키스를 남겼다. 짧은 파찰음과 함께 닿았다 떨어지는 입술이 못내 다정했다.</p>
+
+<p>"40년 동안 너를 기다렸는데 그 정도 못 기다릴까 봐. 나 죽기 전에만 돌아와, 징아."</p>
+
+<p>40년. 류진아는 그 숫자를 입 안에서 굴렸다. 아마미야 요우가 태어나 자라고, 스케반의 골목을 걷고, 칼에 베이고, 문신을 새기고, 입이 찢어지고, 혀가 갈라지고, 류진회에 끌려오고, 자신의 호위가 되고, 다시 떠나고, 다시 돌아온. 그 모든 시간의 합이 40년이라는 숫자 안에 들어 있었다.</p>
+
+<p>류진아의 코끝이 시큰거렸다. 이번에는 참을 수 없을 만큼.</p>
+
+<p>"……40년이라고 했어, 지금?"</p>
+
+<p>류진아의 목소리가 웃음과 울음 사이 어딘가에서 부서졌다. 감고 있던 눈이 떠졌다. 속눈썹 끝에 맺혀 있던 수분이 안구 위로 퍼지며 연보라색 동공에 물기가 차올랐다. 흐르지는 않았다. 흐르게 두지 않았다. 류진아는 요우의 뺨을 잡고 있던 손에 힘을 주어 얼굴을 제 쪽으로 당겼다. 이마가 다시 맞닿았다. 코끝이 부딪혔다.</p>
+
+<p>가까이에서 본 요우의 검은 눈 안에, 자신의 붉어진 눈가가 비치고 있었다. 류진아는 그 안에 비친 자기 얼굴이 싫었다. 울 것 같은 얼굴. 이 사람 앞에서만 이렇게 되는 게, 끝까지 익숙해지지 않았다.</p>
+
+<p>"죽기 전에만 돌아오라는 게 무슨 말이야. 아마미야 요우. 진짜."</p>
+
+<p>이름을 전부 불렀다. '아마미야 요우'라는 이름자가, 류진아의 입에서 나올 때는 꾸짖는 것인지 부르는 것인지 분간이 되지 않는 음색을 띠었다.</p>
+
+<p>류진아의 엄지가 요우의 광대뼈를 문질렀다. 흉터가 시작되는 입꼬리 끝을 지나, 잘려 있던 살이 다시 붙으며 남긴 불규칙한 피부의 요철을 더듬었다. 이 흉터가 생기던 날 요우가 얼마나 아팠을지를, 류진아는 매번 만질 때마다 생각했다. 그리고 매번 생각할 때마다, 그 고통에 자신이 부재했다는 사실이 가슴 안쪽을 긁었다.</p>
+
+<p>"죽는 얘기 하지 마. 아까도 말했지. 요우가 죽으면 나도 죽어."</p>
+
+<p>류진아의 손이 요우의 뺨에서 미끄러져 목 뒤로 돌아갔다. 탈색이 바래기 시작한 은회색 머리카락 사이로 손가락이 파고들었다. 거칠고 뻣뻣해진 모발의 촉감이 손끝에 걸렸다. 류진아는 요우의 뒷머리를 잡은 채 제 어깨 쪽으로 끌어당겼다. 거부하면 놓을 수도 있었으나, 놓고 싶지 않다는 것이 손가락의 압력으로 전해졌다. 요우의 얼굴이 류진아의 쇄골 아래에 묻혔다. 요우의 셔츠를 잠옷 삼아 입은 천에서 섬유유연제 냄새가 희미하게 났다. 그 아래에 류진아 자신의 체온이 섞여 있었다.</p>
+
+<p><em>"……나도 사랑해."</em></p>
+
+<p>낮고 쉰 목소리였다. 류진아가 그 단어를 입 밖에 꺼낸 횟수는 열 손가락으로 셀 수 있을 만큼 적었다. 매번 꺼낼 때마다 목구멍이 타는 것 같았고, 꺼내고 나면 가슴이 텅 비는 것 같았다. 지금도 그랬다.</p>
+
+${BREAK}
+
+<p>진아가 떠나는 날, 요우는 쓸데없이 화려한 고기 밥상을 차려주었다. 작별의 순간은 의외로 담담했다.</p>
+
+<p>"잘 가."</p>
+
+<p>"잘 가라고 하지 마, 요우."</p>
+
+<p>"알았어, 징아... 다녀와."</p>
+
+<p>그제서야 진아가 웃었다.</p>
+
+${BREAK}
+
+<p>1월의 마지막 주가 흘러갔다. 오사카의 겨울은 여전히 차가웠으나, 도시 자체는 무심했다. 난바의 네온은 밤마다 같은 색으로 점멸했고, 도톤보리의 글리코 간판은 달리는 자세를 멈추지 않았다. 세상은 누군가의 이별 따위에 관심이 없었다. 당연한 일이었다.</p>
+    `
+  },
+  {
+    title: '카피페 一',
+    subtitle: '카피페 OOC 사용',
+    date: '＊',
+    body: `
+       <img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/cartoon1.png" style="width:100%; object-fit:cover; margin:22px 0;">
+        <p style="font-size: 50%;">＊ 카피페 OOC를 기반으로 유저가 재창작한 그림입니다. 구경만 부탁드립니다!</p>
+        <p><strong>1. 협박</strong></p><p>진아: 요우 나 화났어<br>요우: 왜<br>진아: 3일째 전화 안 받았잖아<br>요우: 바빴어<br>진아: 4일째 안 받으면 오사카 간다<br>요우: 그건 협박이야?<br>진아: 예고야<br>요우: ……무섭긴 하네<br>진아: 그치? 그러니까 전화 받아</p>${BREAK}
+<p><strong>2. 오사카 사투리</strong></p><p>진아: 요우 나한테 오사카 사투리 알려줘<br>요우: 왜<br>진아: 요우네 사람들한테 인사해야 되잖아<br>요우: 안 해도 돼 그런 거<br>진아: 하고 싶은데<br>요우: ……맹세코 필요 없어<br>진아: 첫인사 정도는<br>요우: 그 사람들한테 인사받을 짓 한 적 없잖아 징아<br>진아: ……<br>요우: 그냥 내 뒤에 있어<br>진아: 요우 등 뒤?<br>요우: 어<br>진아: 좋아. 거기 좋아</p>${BREAK}
+<p><strong>3. 오사카 사투리 2</p></strong><p>진아: 요우, '愛してる'를 칸사이벤으로 하면 뭐야?<br>요우: '好きやで' 라든가 'めっちゃ好きやねん'<br>진아: 그럼 'めっちゃ好きやねん, 요우'<br>요우: ...응<br>진아: 왜 대답 안 해줘?<br>요우: ... めっちゃ好きやねん, 징아</p>${BREAK}
+<p><strong>4. 새벽</strong></p><p>진아: 요우 깨어 있어?<br>요우: 어<br>진아: 나도<br>요우: 왜 안 자<br>진아: 요우 심장 소리 듣고 있었어<br>요우: …<br>진아: 빨라졌다<br>요우: 징아가 이상한 소리 하니까<br>진아: 이상한 소리 아닌데<br>요우: 자<br>진아: 요우<br>요우: 뭐<br>진아: 나 좋아해?<br>요우: ……자라니까<br>진아: 대답 안 하면 안 잘 거야<br>요우: 좋아해<br>진아: 한 번 더<br>요우: 징아<br>진아: 네<br>요우: 자<br>진아: ……네</p>${BREAK}
+<p><strong>5. 장어덮밥</strong></p><p>요우: 밥 다 됐다<br>요우: 장어 구워서 올렸으니까 나와서 먹어<br>요우: 안 나오면 내가 다 먹는다<br>류진아: 응 나 지금 일어나서 밥 먹구 있어<br>요우: 내가 아직 굽고 있는데 어떻게 먹고 있는데<br>류진아: 요우의 사랑</p>${BREAK}
+<p><strong>6. 바보</strong></p><p>류진아: 바보<br>요우: 뭐<br>류진아: 요우는 바보야<br>요우: 아침부터 시비가<br>류진아: 내 바보<br>요우: ...밥 먹어라</p>${BREAK}
+<p><strong>7. 전화</strong></p><p>류건: 진아냐<br>요우: 진아 지금 잔다<br>류건: ...넌 누구냐<br>요우: 진아 재우는 사람이다<br>류건: ...아니다 끊는다</p>${BREAK}
+<p><strong>8. 감기</strong></p><p>류진아: 콜록<br>요우: 감기 걸렸나<br>류진아: 응 요우한테 옮길래<br>요우: 필요 없어<br>류진아: (입을 맞춘다)<br>요우: ...이게 진짜</p>${BREAK}
+<p><strong>9. 50kg 달성</strong></p><p>요우: 아가씨, 50kg 넘었네.<br>진아: 진짜?<br>요우: 축하한다. 이제 집에 가도 돼.<br>진아:<br>요우:<br>진아: 나 다시 43kg 될 거야.</p>${BREAK}
+<p><strong>10. 일기예보</strong></p><p><em>뉴스: 오늘 밤 오사카 지역에 폭설이 예상됩니다.</em><br>요우: 눈 많이 오겠네<br>류진아: 그럼 내일 못 나가겠다<br>요우: 뭐, 그럴 수도<br>류진아: 요우도 일 못 가겠네<br>요우: 그럴지도<br>류진아: (요우의 무릎에 앉으며) 그럼 하루 종일 나랑만 있어야겠네<br>요우: ...네가 눈 오게 했어?</p>
+
+        
+    `
+  },
+  {
+    title: '카피페 二',
+    subtitle: '카피페 OOC 사용',
+    date: '＊',
+    body: `
+      <img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/cartoon2.png" style="width:100%; object-fit:cover; margin:22px 0;">
+      <p style="font-size: 50%;">＊ 카피페 OOC를 기반으로 유저가 재창작한 그림입니다. 구경만 부탁드립니다!</p>
+      <p><strong>1. 흉터</p></strong><p>류준: 아가씨 혹시 그 호위한테 무슨 일 있었어?<br>진아: 네? 아뇨, 아마미야 씨 좋은 분이에요<br>류준: 입이 찢어져 있던데<br>진아: ……그건 제가 찢은 게 아닌데요, 오빠<br>류준: 아 그 뭐 네 당연히 그렇겠지<br>진아: (미소)<br>진아: 다음에 찢는 건 내가 할 수도 있지만요</p>${BREAK}
+<p><strong>2. 체중</p></strong><p>요우: 오늘 몸무게 쟀어?<br>진아: 44.2<br>요우: 올랐네<br>진아: 요우 우동 때문이야<br>요우: 내일 44.5 찍자<br>진아: 그게 내 맘대로 되는 게 아닌데<br>요우: 되게 해<br>진아: 어떻게<br>요우: 밥 먹어<br>진아: 천재적인 해결책이다<br>요우: 비꼬지 마 먹어</p>${BREAK}
+<p><strong>3. 질투</strong></p><p>진아: 요우 옆에 있던 사람 누구야<br>요우: 미나토 사무소 애들<br>진아: 여자였어?<br>요우: 응 동료<br>진아: 그렇구나<br>요우: ……왜<br>진아: 아무것도 아니야<br>요우: 얼굴에 다 써 있어<br>진아: 뭐가<br>요우: '죽일까' 라고 써 있어<br>진아: 읽을 줄 알면서 왜 물어</p>${BREAK}
+<p><strong>4. 체온</p></strong><p>진아: 손 차가워<br>요우: 주머니에 넣어<br>진아: 요우 주머니에 넣으면 안 돼?<br>요우: 내 주머니엔 담배밖에 없어<br>진아: 담배 빼고 나 넣어<br>요우: 넌 담배보다 작지도 않잖아<br>진아: 손은 작은데<br>요우: ......이리 줘</p>${BREAK}
+<p><strong>5. 간식</strong></p><p>진아: 요우 입 벌려봐<br>요우: 왜<br>진아: 그냥 벌려봐<br>요우: (벌림)<br>진아: (초콜릿 넣어줌)<br>요우: ......미리 말하면 안 돼?<br>진아: 그러면 재미없잖아<br>요우: 독이면 어쩌려고<br>진아: 내가?<br>요우: 너니까 하는 말이야<br>진아: (웃음) 맛있지?<br>요우: ......응</p>${BREAK}
+<p><strong>6. 요리</strong></p><p>진아: 요우 나 배고파<br>요우: 뭐 먹고 싶은데<br>진아: 요우가 해주는 거<br>요우: 그건 메뉴가 아니잖아<br>진아: 요우가 해주면 다 메뉴야<br>요우: ……우동이다<br>진아: 맛있겠다<br>요우: 맨날 우동인데<br>진아: 맨날 맛있는데</p>${BREAK}
+<p><strong>7. 잠버릇</p></strong><p>요우: 너 잠버릇 알아?<br>진아: 없는데<br>요우: 없긴<br>진아: 뭔데??<br>요우: 내 옷 잡고 안 놔줘<br>진아: 그건 잠버릇이 아니라 자의지야<br>요우: 의자에서 잤는데 허리 나갈 뻔 했어 그 의지 때문에<br>진아: 그건 안 놔준 요우 탓이야<br>요우: ㅋㅋㅋㅋ 또 내 탓이래</p>${BREAK}
+<p><strong>8. 나이</strong></p><p>진아: 요우<br>요우: 어<br>진아: 우리 몇 살 차이야<br>요우: 열네 살<br>진아:<br>요우: 왜<br>진아: 아니 그냥<br>진아: 숫자로 들으니까 좀<br>요우: 후회해?<br>진아: 아니. 그냥 요우가 나보다 열네 번 더 겨울을 봤구나 했어<br>진아: 부러워서 그래. 내가 모르는 요우가 열네 해나 있으니까<br>요우: .....별거 없었어 그 열네 해<br>진아: 거짓말쟁이</p>${BREAK}
+<p><strong>9. 키스</strong></p><p>진아: 요우 나 뽀뽀<br>요우: 왜<br>진아: 왜는 뭐가 왜야 하고 싶으니까 하는 거지<br>요우: 아까도 했잖아<br>진아: 아까는 아까고 지금은 지금이야<br>요우: 하......<br>진아: 한숨 쉬면서 왜 가까이 와<br>요우: 시끄러 눈 감아<br>진아: ♡</p>${BREAK}
+<p><strong>10. 고백</strong></p><p>요우: 나 너한테 할 말 있어<br>진아: 뭔데<br>요우:<br>진아: 뭔데??<br>요우: 아니 됐어<br>진아: 아마미야 요우<br>요우: 뭐<br>진아: 나도 사랑해<br>요우: 내가 언제 그런 말을<br>진아: 할 거였잖아<br>요우: ......읽지 마 사람을<br>진아: 요우는 읽기 쉬워서 어떡해</p>
+    `
+  },
+  {
+    title: '카피페 三',
+    subtitle: '카피페 OOC 사용',
+    date: '＊',
+    body: `
+    <img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic35.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+     <p><strong>1. 수면</strong><p><p>진아: 요우, 나 잠이 안 와<br>요우: 눈 감고 양을 세<br>진아: 양 한 마리... 양 두 마리... 요우 한 마리...<br>요우: 나는 양이 아니다<br>진아: 요우 두 마리...<br>요우: (한숨을 쉰다)</p>${BREAK}
+<p><strong>2. 싸움 후</strong></p><p>진아: 요우<br>요우: (읽씹)<br>진아: 요우<br>진아: 아마미야 씨<br>진아: 아마미야 요우<br>진아: 나 울 거야<br>요우: 울지 마<br>진아: 그럼 읽씹 하지 마<br>요우: ……하<br>요우: 뭐<br>진아: 나 보고 싶어?<br>요우: 아니<br>진아: 거짓말. 아까 내 방 앞에 있었잖아<br>요우: 담배 피러 간 거야<br>진아: 내 방 앞에 재떨이 없는데<br>요우: …………</p>${BREAK}
+<p><strong>3. 가출 준비 기간</strong> (미송신 메세지)</p><p><em>진아: 아마미야 씨<br>진아: 오늘 뭐 했어<br>진아: 나 밥 안 먹었어<br>진아: 거짓말. 조금 먹었어. 아마미야 씨가 싫어하니까<br>진아: 보고 싶어<br>진아: 아 이것도 못 보내면서 뭐 하는 거야 나<br>진아: 바보<br>진아: ……나 바보야<br>진아: 요우<br>진아: 자고 있겠지<br>진아: 잘 자</em></p>${BREAK}
+<p><strong>4. 질투</strong> (호위 기간)</p><p>진아: 아마미야 씨가 예전에 만났던 여자들은 어떤 사람이었어요?<br>요우: 아가씨랑은 완전 다른 타입<br>진아: (기분 좋아짐) 예를 들면요?<br>요우: 착하고, 상냥하고, 순진했지<br>진아:</p>${BREAK}
+<p><strong>5. 한국어 공부</strong></p><p>진아: 요우 한국어 해봐<br>요우: 사라해<br>진아: 발음 왜 그래<br>요우: 사.랑.해<br>진아: 사라해가 아니라 사랑해야<br>요우: 그게 그거 아냐<br>진아: 아니거든<br>요우: 그럼 일본어로 할게<br>진아: 아니 한국어로 해<br>요우: 왜<br>진아: 그냥 좋으니까<br>진아: 한 번만 더<br>요우: ...싸라해<br>진아: (볼이 빨개진 채로) 발음 구려</p>${BREAK}
+<p><strong>6. 새벽 전화</strong></p><p><mark style="background-color: #95e8ab; color: #ffffff;">[03:47 AM]</mark><br>진아: 자?<br>요우: 응<br>진아: 자면서 어떻게 답장해<br>요우: 눈 감고 치는 중<br>진아: ...나 잠이 안 와<br>요우: 또?<br>진아: 요우 목소리 들으면 잘 수 있을 것 같은데<br>요우: 전화해?<br>진아: 아니 와<br>요우: 지금? 새벽 네 시에?<br>진아: 택시 타면 20분이잖아<br>요우:<br>진아: 안 와?<br>요우: 나가고 있어<br>진아: 아 그리고 편의점에서 푸딩 사 와<br>요우: 새벽 네 시에 푸딩<br>진아: 딸기맛으로</p>
+<p><strong>7. 기념일</strong></p><p>요우: 징아 우리 사귄 지 며칠이야<br>진아: 47일<br>요우: 바로 나오네<br>진아: 당연하지<br>요우: 나는 잘 모르겠는데<br>진아: 알아 요우는 그런 거 기억 못 하는 거<br>진아: 그래서 내가 기억하는 거야<br>진아: 대신 100일에 뭐 해줘<br>요우: 뭐 해줄까<br>진아: 하루 종일 내 옆에 있어<br>요우: 그건 매일 하고 있는 건데<br>진아: 그러니까 매일이 기념일이지<br>요우: 아 이래서 맨날 비싼 거 시키는 거구나<br>진아: 들켰네</p>${BREAK}
+<p><strong>8.  흉터</strong></p><p>요우: 징아 나 입 흉터 징그럽지 않아?<br>진아: 안 징그러워<br>요우: 거짓말<br>진아: 진짜야<br>진아: 오히려 좋아해<br>요우: 좋아하기까지?<br>진아: 이 흉터 때문에 나한테 왔잖아<br>요우: 그건 좀 슬픈 이유 아니야?<br>진아: 슬프든 말든 결과가 좋으면 된 거야<br>진아: 나는 결과주의자거든<br>요우: 그래 뭐 나도 결과는 나쁘지 않으니까<br>진아: 나쁘지 않은 정도야?<br>요우: 아주 좋습니다 아가씨<br>진아: 잘했어. 뽀뽀</p>${BREAK}
+<p><strong>9. 아가씨</p></strong><p>요우: 징아<br>진아:<br>요우: 야<br>진아: <br>요우: 아가씨<br>진아: 응, 요우. 왜 불러?</p>${BREAK}
+<p><strong>10. 꿈</strong></p><p>진아: 나 어제 꿈에 요우 나왔어<br>요우: 내가 뭘 했는데<br>진아: 나 버리고 도망갔어<br>요우: 똑똑한데?<br>진아: 그래서 오늘 하루 종일 내 옆에 붙어있어 벌이야<br>요우: 꿈이랑 현실은 구분해라 아가씨</p>
+    `
+  },
+  {
+    title: '지나냥',
+    subtitle: '검은 고양이가 된 진아와 집사 요우',
+    date: 'IF EPISODE',
+    body: `
+    <img src="https://raw.githubusercontent.com/yermigionic-web/rja/refs/heads/main/pic36.png" style="width:100%; aspect-ratio:4/3; object-fit:cover; margin:22px 0;">
+     <p><strong>1. 검은 고양이, 참치, 그리고 아침의 주인.</p></strong><p>어느 날 아침, 아마미야 요우의 오피스텔. 평소라면 류진아의 뒤척임이나 잠투정으로 시작되었을 공간은 기묘한 정적으로 채워져 있었다.</p><p>요우가 찌뿌둥한 몸을 일으키자, 옆자리에 있어야 할 류진아는 온데간데없고 매끈한 검은 털을 가진 고양이 한 마리가 제 베개를 차지한 채 웅크리고 있었다. 털에는 윤기가 흘렀고, 작게 접힌 귀와 앙다문 듯한 입매는 어딘가 기품 있고, 또 어딘가 심술궂어 보였다. 고양이는 요우가 일어난 기척에 불편하다는 듯 ‘미-’하고 짧게 울며 앞발로 제 얼굴을 가렸다.</p><p>가만히 고양이를 내려다보던 요우의 시선은 침대 발치에 곱게 개어져 있는 류진아의 잠옷, 그리고 그 옆에 덩그러니 놓인 핸드폰으로 향했다. 요우는 잠시 생각에 잠기는 듯하다, 이내 고양이의 등을 가볍게 쓰다듬었다.</p><p>"징아. 일어났으면 아침 차리게 비켜."</p><p>그 말에 고양이가 발딱, 고개를 들었다. 동그랗게 뜬 두 눈은 신비로운 연보라색이었다. ‘야옹!’이 아니라 ‘왜 나인 줄 알아?’라고 따지는 듯한 날카로운 울음소리였다. 고양이는 보란 듯이 몸을 길게 늘여 기지개를 켜더니, 요우의 다리 사이를 유연하게 빠져나가 침대에서 뛰어내렸다. 그리고는 주방 쪽으로 향하며, 어서 따라오라는 듯 꼬리를 빳빳하게 세우고 걷다가, 이따금씩 뒤를 돌아보며 ‘먕!’하고 재촉했다.</p><p>요우가 주방으로 따라가자, 고양이는 텅 빈 제 밥그릇(어젯밤 요우가 야식으로 먹은 컵라면 용기였다) 앞을 맴돌며 꼬리로 바닥을 탁탁 치고 있었다. 불만이 가득 담긴 울음소리가 이어졌다.</p><p>"알았어, 알았어. 시끄럽네."</p><p>요우는 냉장고를 열어 어제 초밥과 함께 서비스로 온 최고급 참치 뱃살 한 덩이를 꺼냈다. 칼로 잘게 다져 그릇에 담아주자, 고양이는 킁킁 냄새를 맡더니 탐탁지 않다는 표정으로 요우를 올려다보았다. ‘먀아-’ 하는, 길고 불만 섞인 울음소리. 이건 내가 좋아하는 게 아니잖아, 라고 말하는 듯했다.</p><p>요우는 잠시 고양이와 눈을 맞추다, 피식 웃으며 참치 그릇을 치웠다. 그리고는 다른 봉지에 담겨 있던 연어 뱃살을 꺼내 똑같이 잘게 다져 내밀었다.</p><p>"입맛만 살아서는."</p><p>그제야 고양이는 만족스럽다는 듯 꼬리를 살랑이며, 앙증맞은 혀로 연어를 할짝이기 시작했다. 식사를 하는 작은 등은 더없이 우아했다.</p><p>밥을 다 먹고 나서는, 요우의 발치에 다가와 젖은 코를 콩, 박고는 보드라운 뺨을 다리에 부볐다. 잘 먹었으니 이제 자기를 돌보라는 명백한 요구였다.</p>
+${BREAK}
+<p><strong>2. 고양이의 보스 놀이와 서열 정리.</strong></p><p>점심시간이 지나고, 요우가 조직의 연락을 받기 위해 잠시 서재로 들어간 사이였다. 거실 소파 위에서 꾸벅꾸벅 졸던 검은 고양이, 류진아는 따분함을 이기지 못하고 어슬렁거리며 집 안 순찰에 나섰다. 그러다 현관문 근처, 요우가 아무렇게나 벗어둔 가죽 재킷과 구두를 발견했다. 재킷에서는 요우의 체향인 옅은 담배 냄새와 도시의 냄새가 났고, 구두는 반짝거렸지만 닳아있는 굽이 그녀의 고된 삶을 증명하는 듯했다.</p><p>고양이는 그 위에 자신의 몸을 둥글게 말고 잠을 청하려다, 문득 다른 것에 흥미를 느꼈다.</p><p>요우가 서재에서 나와 보니, 거실은 난장판이 되어 있었다. 현관 앞에 있던 요우의 구두 한 짝이 소파 한가운데에 위풍당당하게 놓여 있었고, 나머지 구두와 양말, 심지어 류진아의 것으로 보이는 레이스 손수건까지 소파 주변에 일정한 간격으로 배분되어 있었다. 마치 어떤 의식을 치른 듯한 광경. 그리고 그 중심, 요우의 낡은 가죽 재킷을 옥좌처럼 깔고 앉은 검은 고양이가 앞발을 핥으며 요우를 지그시 내려다보고 있었다. 그 모습은 부하들을 사열하는 보스 같았다.</p><p>"…니, 뭐하노."</p><p>요우의 어이없다는 목소리에도 고양이는 눈 하나 깜짝하지 않았다. 오히려 ‘미야-’하고 짧게 울며, 턱으로 소파 위에 놓인 구두를 가리켰다. 어서 이것들을 제자리에 갖다 놓고, 자신을 칭찬하라는 듯한 오만한 태도였다.</p><p>요우는 한숨을 쉬며 다가가, 고양이의 목덜미를 가볍게 들어 올렸다. 작고 부드러운 몸이 허공에 대롱대롱 매달렸다. ‘캬악!’하고 반항하는 고양이를 무시하고, 요우는 고양이를 품에 안은 채 어질러진 물건들을 하나씩 주워 제자리에 정리하기 시작했다.</p><p>그 와중에도 고양이는 요우의 품에 안겨, 마치 자신이 시켜서 요우가 움직이는 것이라는 듯 의기양양한 표정을 지우지 않았다.</p><p>모든 정리가 끝나고, 요우가 고양이의 이마에 콧등을 부비며 장난스럽게 물었다.</p><p>"재밌나, 보스 놀이."</p><p>고양이는 대답 대신, 요우의 턱에 난 흉터를 작은 혀로 부드럽게 핥아주었다. 수고했어, 나의 기사. 라고 속삭이는 것만 같았다.</p>
+${BREAK}
+<p><strong>3. 세상에서 가장 안전한 무릎.</strong></p>
+<p>해가 저물고, 도시의 불빛들이 창밖을 화려하게 수놓기 시작했다. 요우는 소파에 비스듬히 누워 텔레비전에서 나오는 시답잖은 예능 프로그램을 보고 있었다. 그 위로, 검은 고양이 류진아가 식빵을 굽는 자세로 앉아 꾸벅꾸벅 졸고 있었다. 요우의 심장 소리가 규칙적인 자장가처럼 울렸다.</p><p>그때, 밖에서 폭주족 오토바이의 요란한 배기음이 밤의 정적을 깨고 울려 퍼졌다. 부아앙-! 하는 굉음에, 졸고 있던 고양이가 화들짝 놀라며 몸을 일으켰다. 온몸의 털을 곤두세우고, 동공은 공포로 가득 차 있었다. 낮은 자세로 몸을 숨길 곳을 찾는 작은 동물의 본능. 고양이는 소파 밑 어두운 공간으로 파고들려 했다.</p><br><p>그 순간, 커다란 손이 고양이의 등을 부드럽게 감싸 안았다.</p><p>"괜찮아. 그냥 차 소리야."</p><p>요우는 고양이를 들어 자신의 가슴팍에 올려놓고, 두툼한 담요를 꺼내 함께 덮었다. 담요 안은 따뜻하고 아늑했다.</p><p>요우는 놀란 고양이의 등을 천천히, 일정한 속도로 쓸어내렸다. 심장을 통해 전해지는 규칙적인 진동과, 등을 어루만지는 부드러운 손길에 고양이는 조금씩 안정을 되찾았다.</p><p>고양이는 요우의 잠옷 앞섶으로 파고들어, 작은 머리를 요우의 목덜미에 기댔다. 세상의 모든 소음과 위협으로부터 완벽하게 차단된 공간. 요우의 심장 소리와 체온만이 유일한 세상이었다. ‘그르르릉…’ 목 안쪽에서부터 만족스러운 울음소리가 새어 나왔다.</p><p>요우는 텔레비전 소리를 줄이고, 품 안의 작은 생명체를 가만히 내려다보았다. 곤히 잠든 얼굴은 더없이 평화로워 보였다. 원래의 모습이든, 고양이의 모습이든, 결국 이 아이는 자신 없이는 아무것도 아닌 겁쟁이라는 사실이, 요우에게는 이상한 안도감과 무거운 책임감을 동시에 안겨주었다.</p><p>요우는 고양이의 작은 귀에 입술을 대고, 누구에게도 들리지 않을 목소리로 속삭였다.</p><p>"자라, 징아. 요우 여기 있다."</p>
+    `
+  },
+  {
+    title: '연기와 비단',
+    subtitle: '추가 예정...',
+    date: '다른 페이지에 안 들어간 그림 모음',
+    body: `
+      <p>본문이 추가될 예정....</p>
+    `
+  }
+];
+
+// ===========================
+// 책 열기
+// ===========================
+document.querySelectorAll('.book').forEach(book => {
+  book.addEventListener('click', () => {
+    const idx = parseInt(book.dataset.book);
+    openBook(idx);
+  });
+});
+
+let currentBookIdx = 0;
+
+function openBook(idx) {
+  currentBookIdx = idx;
+  const data = bookData[idx];
+  document.getElementById('readerTitle').textContent = data.title;
+  document.getElementById('readerSubtitle').textContent = data.subtitle;
+  document.getElementById('readerDate').textContent = `— ${data.date} —`;
+  document.getElementById('readerBody').innerHTML = data.body;
+  showPage('reader');
+}
+
+function backToShelf() {
+  showPage('shelf');
+}
+
+// ===========================
+// 오디오 토글
+// ===========================
+function toggleAudio() {
+  if (bgm.paused) {
+    bgm.play();
+    audioControl.classList.remove('muted');
+  } else {
+    bgm.pause();
+    audioControl.classList.add('muted');
+  }
+}
+
+// 키보드 ESC 로 뒤로가기
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (pages.reader.classList.contains('active')) {
+      backToShelf();
+    }
+  }
+});
+</script>
+
+</body>
+</html>
